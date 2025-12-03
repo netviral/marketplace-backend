@@ -1,0 +1,31 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // or "mysql" or "sqlite"
+  url      = env("DATABASE_URL")
+
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  roles     String[]
+  isActive  Boolean  @default(true)
+  isBlocked Boolean  @default(false)
+}
+
+model Vendor {
+  id           String   @id @default(uuid())
+  name         String
+  description  String
+  contactEmail String
+  contactPhone String
+  categories   String[]
+  isActive     Boolean  @default(true)
+  isVerified   Boolean  @default(false)
+}
