@@ -1,6 +1,7 @@
 import express from "express";
 import UserService from "../../services/UserService.js";
 import { ApiResponse } from "../../models/apiResponse.js";
+import User from "../../models/User.model.js";
 
 const router = express.Router({ mergeParams: true });
 
@@ -8,9 +9,9 @@ const router = express.Router({ mergeParams: true });
 router.post("/", async (req, res) => {
   try {
     var { name, email, roles } = req.body;
-    console.log(req.body);
+    // console.log(req.body);
     roles = JSON.parse(roles);
-    console.log(name, email, roles);
+    // console.log(name, email, roles);
 
     const user = await UserService.registerUser(name, email, roles);
     res.api(ApiResponse.success(201, "User created", user));
@@ -22,9 +23,9 @@ router.post("/", async (req, res) => {
 // READ /me
 router.get("/me", async (req, res) => {
   try {
-    const email = req.user?.email;
-    if (!email) throw new Error("Unauthorized");
-
+    const user = req.user as User;
+    if (!user.email) throw new Error("Unauthorized");
+    console.log(user);
     // const user = await UserService.getOrCreateByEmail(email);
     res.api(ApiResponse.success(200, "User fetched", "user"));
   } catch (err: any) {

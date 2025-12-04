@@ -14,12 +14,11 @@ export default class User extends BaseModel {
         this._roles = roles;
     }
 
-    get name() { return this._name; }
-    get email() { return this._email; }
-    get roles() { return this._roles; }
-    get isActive() { return this._isActive; }
-    get isBlocked() { return this._isBlocked; }
-
+    public get name() { return this._name; }
+    public get email() { return this._email; }
+    public get roles() { return this._roles; }
+    public get isActive() { return this._isActive; }
+    public get isBlocked() { return this._isBlocked; }
     public hasRole(role: string): boolean {
         return this._roles.includes(role);
     }

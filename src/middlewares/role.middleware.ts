@@ -1,9 +1,11 @@
 // src/middlewares/role.middleware.ts
 import { Request, Response, NextFunction } from "express";
+import User from "../models/User.model.js";
 
 export class RoleMiddleware {
   static requireStudent(req: Request, res: Response, next: NextFunction) {
-    if (!req.user || !req.user.roles.includes("student")) {
+    const user = req.user as User;
+    if (!user || !user.roles.includes("student")) {
       return res.api({
         success: false,
         code: 403,
@@ -16,7 +18,8 @@ export class RoleMiddleware {
   }
 
   static requireAdmin(req: Request, res: Response, next: NextFunction) {
-    if (!req.user || req.user.role !== "admin") {
+    const user = req.user as User;
+    if (user.isAdmin() === false) {
       return res.api({
         success: false,
         code: 403,
@@ -30,7 +33,8 @@ export class RoleMiddleware {
 
   static requireRole(roles: string[]) {
     return (req: Request, res: Response, next: NextFunction) => {
-      if (!req.user || !roles.includes(req.user.roles)) {
+      const user = req.user as User;
+      if (!user || !roles.some(role => user.roles.includes(role))) {
         return res.api({
           success: false,
           code: 403,

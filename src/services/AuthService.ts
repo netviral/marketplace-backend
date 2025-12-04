@@ -7,17 +7,22 @@ interface LoginResult {
   user: any;
 }
 
+interface JwtPayload {
+  id: string;
+  email: string;
+}
+
 export class AuthService {
   private static users = [
-    { id: 1, email: "ibrahim@example.com", password: "12345" },
-    { id: 2, email: "user2@example.com", password: "abcdef" },
+    { id: "1", email: "ibrahim@example.com", password: "12345" },
+    { id: "2", email: "user2@example.com", password: "abcdef" },
   ];
 
   static login(email: string, password: string): LoginResult | null {
     const user = this.users.find((u) => u.email === email && u.password === password);
     if (!user) return null;
 
-    const payload = { id: user.id, email: user.email };
+    const payload: JwtPayload = { id: user.id, email: user.email };
 
     const accessToken = JwtService.generateAccessToken(payload);
     const refreshToken = JwtService.generateRefreshToken(payload);

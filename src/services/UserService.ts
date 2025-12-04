@@ -8,12 +8,13 @@ export default class UserService {
     let user = await UserRepository.findByEmail(email);
     if (user) return user;
 
-    const newUser = UserFactory.createNew("Name", email, ["user"]);
+    const newUser = UserFactory.createNew("Ibrahim Khalil", email, ["user"]);
     return await UserRepository.create(newUser);
   }
 
   static async registerUser(name: string, email: string, roles: string[] = ["user"]): Promise<User> {
     const user = UserFactory.createNew(name, email, roles);
+    console.log(user);
     return await UserRepository.create(user);
   }
 }
