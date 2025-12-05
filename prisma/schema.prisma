@@ -54,7 +54,6 @@ model Vendor {
 model Listing {
   id            String        @id @default(uuid())
   name          String
-  tags          String[]
   images        String[]
   description   String
   type          ListingType
@@ -66,6 +65,7 @@ model Listing {
   vendorId String
   vendor   Vendor @relation(fields: [vendorId], references: [id])
 
+  tags         Tag[]    @relation("ListingTags")
   reviews      Review[]
   orders       Order[]
   wishlistedBy User[]   @relation("UserWishList")
@@ -75,6 +75,12 @@ model Listing {
 
   @@unique([vendorId, name])
   @@index([vendorId])
+}
+
+model Tag {
+  id       String    @id @default(uuid())
+  name     String    @unique
+  listings Listing[] @relation("ListingTags")
 }
 
 model Review {
