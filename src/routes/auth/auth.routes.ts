@@ -6,29 +6,6 @@ const router = express.Router();
 
 router.use(express.json());
 
-// Login endpoint
-router.post("/login", (req: Request, res: Response) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.api(ApiResponse.error(400, "Email and password are required."));
-  }
-
-  const result = AuthService.login(email, password);
-
-  if (!result) {
-    return res.api(ApiResponse.error(401, "Invalid credentials."));
-  }
-
-  return res.api(
-    ApiResponse.success(200, "Login successful", {
-      accessToken: result.accessToken,
-      refreshToken: result.refreshToken,
-      user: result.user,
-    })
-  );
-});
-
 // Refresh endpoint
 router.post("/refresh", (req: Request, res: Response) => {
   const { refreshToken } = req.body;

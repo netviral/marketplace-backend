@@ -4,7 +4,7 @@ import { ApiResponse } from "../models/apiResponse.js";
 import UserService from "../services/UserService.js";
 
 export class AuthMiddleware {
-  static async authenticateJWT(req: Request, res: Response, next: NextFunction) {
+  static async isJWTAuthenticated(req: Request, res: Response, next: NextFunction) {
     const authHeader = req.headers.authorization;
 
     // 1. Check token exists + starts with Bearer
@@ -48,4 +48,36 @@ export class AuthMiddleware {
       );
     }
   }
+
+  static async isNotJWTAuthenticated(req: Request, res: Response, next: NextFunction) {
+    const authHeader = req.headers.authorization;
+
+    // No token → user is NOT authenticated → allow them through
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return next();
+    }
+
+    const token = authHeader.split(" ")[1] || "";
+
+    try {
+      const decoded = JwtService.verifyAccessToken(token) as {
+        id: string;
+        email: string;
+      };
+
+      // If token verified → user should NOT be here → redirect or error
+      if (decoded?.email) {
+        return res.api(
+          ApiResponse.error(403, "Already logged in", "AUTH_ALREADY_AUTHENTICATED")
+        );
+      }
+
+      // Somehow decoded but no email → treat as not authenticated
+      return next();
+    } catch (err) {
+      // Token invalid → user needs to log in → allow through
+      return next();
+    }
+  }
+
 }

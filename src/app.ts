@@ -1,5 +1,3 @@
-import path from "path";
-
 import express, {Request, Response, NextFunction} from 'express';
 import userRouter from './routes/users/index.js';
 import authRouter from "./routes/auth/auth.routes.js";
@@ -7,7 +5,7 @@ import { AuthMiddleware } from "./middlewares/auth.middleware.js";
 import bodyParser from "body-parser";
 import { apiResponseMiddleware } from "./middlewares/apiResponse.middleware.js";
 import passport from "./config/passport.js";
-import googleAuthRoutes from "./routes/auth/google.js";
+import googleAuthRouter from "./routes/auth/google.js";
 import session from "express-session";
 
 const app = express();
@@ -28,11 +26,11 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Google OAuth routes
-app.use(googleAuthRoutes);
+app.use("/auth",googleAuthRouter);
 
 app.use("/auth", authRouter);
 
-app.use('/users', AuthMiddleware.authenticateJWT, userRouter);
+app.use('/users', AuthMiddleware.isJWTAuthenticated, userRouter);
 
 app.use((req: Request, res: Response) => {
   res.status(404).json({ message: 'Route not found' });
