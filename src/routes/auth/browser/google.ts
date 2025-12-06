@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import passport from "../../../config/passport.js";
 import { JwtService } from "../../../services/jwtService.js";
 import { AuthMiddleware } from "../../../middlewares/auth.middleware.js";
+import ensureGoogleRedirect  from "../../../middlewares/ensureGoogleRedirect.js";
 import UserService from "../../../services/UserService.js";
 import { ApiResponse } from "../../../models/apiResponse.js";
 import { JwtPayload } from "jsonwebtoken";
@@ -20,7 +21,7 @@ interface AppJwtPayload extends JwtPayload {
  */
 router.get(
   "/google",
-  AuthMiddleware.isNotJWTAuthenticated,
+  AuthMiddleware.isNotCookieAuthenticated,
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
@@ -28,7 +29,7 @@ router.get(
  * /auth/browser/google/callback
  */
 router.get(
-  "/google/callback",
+  "/google/callback", ensureGoogleRedirect, 
   passport.authenticate("google", { session: false }),
   async (req: Request, res: Response) => {
     try {
@@ -80,7 +81,7 @@ router.get(
 router.get("/me", async (req: Request, res: Response) => {
   try {
     const token = req.cookies?.accessToken;
-    console.log("ME token:", token);
+    // console.log("ME token:", token);
     
     if (!token) {
       return res.api(ApiResponse.error(401, "Not logged in"));
@@ -90,7 +91,7 @@ router.get("/me", async (req: Request, res: Response) => {
     console.log("ME decoded:", decoded);
 
     if (!decoded?.email) {
-      return res.api(ApiResponse.error(401, "Invalid token"));
+      return res.api(ApiResponse.error(401, "Invalid token. Please logout and log back in."));
     }
 
     const user = await UserService.getUserByEmail(decoded.email);
@@ -111,7 +112,7 @@ router.get("/me", async (req: Request, res: Response) => {
  * /auth/browser/logout
  * Clears cookies
  */
-router.get("/logout", AuthMiddleware.isJWTAuthenticated, (req: Request, res: Response) => {
+router.get("/logout", AuthMiddleware.isCookieAuthenticated, (req: Request, res: Response) => {
   res.clearCookie("accessToken", { path: "/" });
   res.clearCookie("refreshToken", { path: "/" });
 

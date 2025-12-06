@@ -33,7 +33,7 @@ app.use("/auth/browser",googleBrowserAuthRouter);
 
 app.use("/auth", authRouter);
 
-app.use('/users', AuthMiddleware.isJWTAuthenticated, userRouter);
+app.use('/users', AuthMiddleware.isBearerAuthenticated, userRouter);
 
 app.use((req: Request, res: Response) => {
     res.api(ApiResponse.error(404, "Resource not found"));
