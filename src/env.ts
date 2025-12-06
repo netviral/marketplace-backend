@@ -38,6 +38,26 @@ const envSchema = z.object({
   JWT_REFRESH_SECRET: z.string().min(1, "JWT_REFRESH_SECRET is required"),
   JWT_EXPIRES_IN: z.string().min(1),          // "15m"
   JWT_REFRESH_EXPIRES_IN: z.string().min(1),  // "30d"
+
+  ALLOWED_DOMAINS: z
+    .string()
+    .default("ashoka.edu.in,mycompany.com")
+    .transform((v) =>
+      v
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    ),
+
+  ALLOWED_LIST: z
+    .string()
+    .default("admin@ashoka.edu.in,dev@mycompany.com")
+    .transform((v) =>
+      v
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    ),
 });
 
 const parsed = envSchema.parse(process.env);

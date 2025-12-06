@@ -4,18 +4,27 @@ import User from "../models/User.model.js";
 
 export default class UserService {
 
-  static async getUserByEmail(email: string): Promise<User> {
+  static async getUserByEmail(email: string): Promise<User | null> {
     let user = await UserRepository.findByEmail(email);
     if (user){
       return user;
-    } else {
-      return UserFactory.createNew("","",email, ["user"]);
-    }
+    } 
+    return null;
   }
 
-  static async registerUser(name: string, imageUrl: string, email: string, roles: string[] = ["user"]): Promise<User> {
+  static async registerUser(name: string, email:string, imageUrl: string, roles: string[] = ["user"]): Promise<User> {
     const user = UserFactory.createNew(name, imageUrl, email, roles);
+    await UserRepository.create(user);
     return user;
+  }
+
+  static async updateUser(name: string, email:string, imageUrl: string, roles: string[] = ["user"]): Promise<User | null> {
+    const user = await UserRepository.findByEmail(email);
+    if(user !== null) {
+      await UserRepository.update(new User(user.id, name, user.email, imageUrl, roles));
+      return user;
+    }
+    return null;
   }
   
   static async verifyApiKey(email: string, apiKey: string): Promise<User | null> {

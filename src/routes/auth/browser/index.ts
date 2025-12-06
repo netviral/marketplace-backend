@@ -10,11 +10,6 @@ import googleRouter from "./google.js";
 
 const app = express();
 app.use(express.json());
-// ---- Custom JWT Payload ----
-interface AppJwtPayload extends JwtPayload {
-  email: string;
-  sub: string; // googleId
-}
 
 const router = express.Router({ mergeParams: true });
 
@@ -29,15 +24,16 @@ router.get("/me", async (req: Request, res: Response) => {
       return res.api(ApiResponse.error(401, "Not logged in"));
     }
 
-    const decoded = JwtService.verifyAccessToken(token) as AppJwtPayload;
-    console.log("ME decoded:", decoded);
+    const user = JwtService.verifyAccessToken(token) as JwtPayload;
+    
+    console.log("ME:", user);
 
-    if (!decoded?.email) {
+    if (!user?.email) {
       return res.api(ApiResponse.error(401, "Invalid token. Please logout and log back in."));
     }
 
-    const user = await UserService.getUserByEmail(decoded.email);
-    if (!user) {
+    const fetchedUser = await UserService.getUserByEmail(user.email);
+    if (!fetchedUser) {
       return res.api(ApiResponse.error(404, "User does not exist"));
     }
 

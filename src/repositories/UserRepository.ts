@@ -10,6 +10,27 @@ export default class UserRepository {
   }
 
 
+  static async create(user: User): Promise<User> {
+    try {
+      const db = await prisma.user.create({
+        data: {
+          id: user.id,
+          name: user["_name"],
+          email: user["_email"],
+          imageUrl: user["_imageUrl"],
+          roles: user["_roles"],
+        },
+      });
+
+      return new User(db.id, db.name, db.email, db.imageUrl ?? "", db.roles);
+    } catch (err) {
+      console.error("Prisma User.create failed:", err);
+
+      // Optional: wrap in your own custom error for controllers to catch
+      throw new Error("Failed to create user: " + (err as any).message);
+    }
+  }
+
   static async update(user: User): Promise<User> {
     const db = await prisma.user.update({
       where: { email: user.email },
@@ -18,8 +39,9 @@ export default class UserRepository {
         roles: user.roles,
       }
     });
-    return user;
+    return new User(db.id, db.name, db.email, db.imageUrl ?? "", db.roles);
   }
+  
   
   static async verifyApiKey(email: string, apiKey:string): Promise<boolean> {
     if(email && apiKey) {

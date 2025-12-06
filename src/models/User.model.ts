@@ -1,3 +1,4 @@
+import ENV from "../env.js";
 export default class User {
     private _id: string;
     private _name: string;
@@ -8,13 +9,28 @@ export default class User {
     private _isBlocked? : boolean;
     private _apiKey? : string;
 
-    constructor(id: string, imageUrl:string, name: string, email: string, roles: string[]) {
-        this._id = id;
-        this._imageUrl = imageUrl;
-        this._name = name;
-        this._email = email;
-        this._roles = roles;
-    }
+     constructor(
+    id: string,
+    imageUrl: string,
+    name: string,
+    email: string,
+    roles: string[]
+  ) {
+    this._id = id;
+    this._imageUrl = imageUrl;
+    this._name = name;
+    this._email = email;
+    this._roles = roles;
+
+    // Check if email is allowed
+    const domainAllowed = ENV.ALLOWED_DOMAINS.some(domain =>
+      email.endsWith(`@${domain}`)
+    );
+    const inAllowedList = ENV.ALLOWED_LIST.includes(email);
+
+    this._isActive = domainAllowed || inAllowedList;
+    this._isBlocked = false;
+  }
 
     public get name() { return this._name; }
     public get email() { return this._email; }
