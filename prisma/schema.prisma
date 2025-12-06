@@ -61,6 +61,7 @@ model Listing {
   availableQty  Int?
   isAvailable   Boolean?
   price         Decimal?      @db.Decimal(10, 2)
+  variants      String[]      @default([])
 
   vendorId String
   vendor   Vendor @relation(fields: [vendorId], references: [id])
