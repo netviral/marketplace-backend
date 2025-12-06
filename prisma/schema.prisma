@@ -21,6 +21,8 @@ model User {
   isAdmin   Boolean  @default(false)
   phone     String?
   address   String?
+  passwordHash   String?
+  apiKey   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

@@ -40,4 +40,14 @@ export default class UserRepository {
     });
     return new User(db.id, db.name, db.email, db.roles);
   }
+  
+  static async verifyApiKey(email: string, apiKey:string): Promise<boolean> {
+    if(email && apiKey) {
+      const user: User | null = await this.findByEmail(email);
+      if(user !== null) {
+        return user["apiKey"] === apiKey;
+      }
+    }
+    return false;
+  }
 }

@@ -1,9 +1,10 @@
 import express from "express";
 import UserService from "../../services/UserService.js";
-import { ApiResponse } from "../../models/apiResponse.js";
+import { ApiResponse } from "../../models/apiResponse.model.js";
 import User from "../../models/User.model.js";
 
 const router = express.Router({ mergeParams: true });
+
 
 // CREATE
 router.post("/", async (req, res) => {

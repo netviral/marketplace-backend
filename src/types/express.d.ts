@@ -1,6 +1,6 @@
 import * as express from 'express';
 import "express-serve-static-core";
-import { ApiResponse } from "../models/apiResponse.js";
+import { ApiResponse } from "../models/apiResponse.model.js";
 import User from "../models/User.model.js";
 
 declare module "express-serve-static-core" {

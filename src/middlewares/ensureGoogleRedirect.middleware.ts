@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { ApiResponse } from "../models/apiResponse.js";
+import { ApiResponse } from "../models/apiResponse.model.js";
 
 export default function ensureGoogleRedirect(req: Request, res: Response, next: NextFunction) {
   const { code, state } = req.query;

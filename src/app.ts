@@ -5,10 +5,11 @@ import { AuthMiddleware } from "./middlewares/auth.middleware.js";
 import bodyParser from "body-parser";
 import { apiResponseMiddleware } from "./middlewares/apiResponse.middleware.js";
 import passport from "./config/passport.js";
-import googleBrowserAuthRouter from "./routes/auth/browser/google.js";
+import BrowserAuthRouter from "./routes/auth/browser/index.js";
+import ApiAuthRouter from "./routes/auth/api/bearer-token.js";
 import session from "express-session";
 import cookieParser from "cookie-parser";
-import { ApiResponse } from './models/apiResponse.js';
+import { ApiResponse } from './models/apiResponse.model.js';
 
 
 const app = express();
@@ -29,7 +30,9 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Google OAuth routes
-app.use("/auth/browser",googleBrowserAuthRouter);
+app.use("/auth/browser", BrowserAuthRouter);
+
+app.use("/auth/api", ApiAuthRouter);
 
 app.use("/auth", authRouter);
 

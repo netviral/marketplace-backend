@@ -6,6 +6,7 @@ export default class User extends BaseModel {
     private _roles: string[];
     private _isActive? : boolean;
     private _isBlocked? : boolean;
+    private _apiKey? : string;
 
     constructor(id: string, name: string, email: string, roles: string[]) {
         super(id);
@@ -19,6 +20,7 @@ export default class User extends BaseModel {
     public get roles() { return this._roles; }
     public get isActive() { return this._isActive; }
     public get isBlocked() { return this._isBlocked; }
+    public get apiKey() { return this._apiKey; }
     public hasRole(role: string): boolean {
         return this._roles.includes(role);
     }

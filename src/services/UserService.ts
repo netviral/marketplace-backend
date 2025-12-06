@@ -17,4 +17,18 @@ export default class UserService {
     console.log(user);
     return await UserRepository.create(user);
   }
+  
+  static async verifyApiKey(email: string, apiKey: string): Promise<User | null> {
+    const user = await UserRepository.findByEmail(email);
+    if (!user) {
+      return null;
+    }
+
+    const isApiKeyValid = await UserRepository.verifyApiKey(email, apiKey);
+    if (!isApiKeyValid) {
+      return null;
+    }
+
+    return user;
+  }
 }

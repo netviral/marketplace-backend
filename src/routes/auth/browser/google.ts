@@ -2,12 +2,12 @@ import express, { Request, Response } from "express";
 import passport from "../../../config/passport.js";
 import { JwtService } from "../../../services/jwtService.js";
 import { AuthMiddleware } from "../../../middlewares/auth.middleware.js";
-import ensureGoogleRedirect  from "../../../middlewares/ensureGoogleRedirect.js";
+import ensureGoogleRedirect  from "../../../middlewares/ensureGoogleRedirect.middleware.js";
 import UserService from "../../../services/UserService.js";
-import { ApiResponse } from "../../../models/apiResponse.js";
+import { ApiResponse } from "../../../models/apiResponse.model.js";
 import { JwtPayload } from "jsonwebtoken";
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 // ---- Custom JWT Payload ----
 interface AppJwtPayload extends JwtPayload {
@@ -74,51 +74,5 @@ router.get(
   }
 );
 
-/**
- * /auth/browser/me
- * Validate cookies → return User info
- */
-router.get("/me", async (req: Request, res: Response) => {
-  try {
-    const token = req.cookies?.accessToken;
-    // console.log("ME token:", token);
-    
-    if (!token) {
-      return res.api(ApiResponse.error(401, "Not logged in"));
-    }
-
-    const decoded = JwtService.verifyAccessToken(token) as AppJwtPayload;
-    console.log("ME decoded:", decoded);
-
-    if (!decoded?.email) {
-      return res.api(ApiResponse.error(401, "Invalid token. Please logout and log back in."));
-    }
-
-    const user = await UserService.getUserByEmail(decoded.email);
-    if (!user) {
-      return res.api(ApiResponse.error(404, "User does not exist"));
-    }
-
-    return res.api(
-      ApiResponse.success(200, "User fetched", { user })
-    );
-  } catch (err) {
-    console.error("ME error:", err);
-    return res.api(ApiResponse.error(401, "Invalid or expired token"));
-  }
-});
-
-/**
- * /auth/browser/logout
- * Clears cookies
- */
-router.get("/logout", AuthMiddleware.isCookieAuthenticated, (req: Request, res: Response) => {
-  res.clearCookie("accessToken", { path: "/" });
-  res.clearCookie("refreshToken", { path: "/" });
-
-  return res.api(
-    ApiResponse.success(202, "Logged out successfully", {})
-  );
-});
 
 export default router;

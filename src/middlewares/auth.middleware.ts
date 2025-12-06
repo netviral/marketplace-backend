@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { JwtService } from "../services/jwtService.js";
 import UserService from "../services/UserService.js";
-import { ApiResponse } from "../models/apiResponse.js";
+import { ApiResponse } from "../models/apiResponse.model.js";
 
 export class AuthMiddleware {
   // -----------------------------

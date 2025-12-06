@@ -1,4 +1,4 @@
-import { ApiResponse } from "../models/apiResponse.js";
+import { ApiResponse } from "../models/apiResponse.model.js";
 import { Request, Response, NextFunction } from "express";
 
 export const apiResponseMiddleware = (
