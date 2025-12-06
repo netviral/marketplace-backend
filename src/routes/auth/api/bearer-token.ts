@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
-import { AuthService } from "../../services/AuthService.js";
-import { ApiResponse } from '../../models/apiResponse.js';
+import { AuthService } from "../../../services/AuthService.js";
+import { ApiResponse } from '../../../models/apiResponse.js';
 
 const router = express.Router();
 
