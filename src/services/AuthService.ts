@@ -1,4 +1,5 @@
 // services/AuthService.ts
+import JwtBody from "../models/jwt.payload.js";
 import { JwtService } from "./jwtService.js";
 
 interface LoginResult {
@@ -7,37 +8,29 @@ interface LoginResult {
   user: any;
 }
 
-interface JwtPayload {
-  id: string;
-  email: string;
-}
-
 export class AuthService {
-  private static users = [
-    { id: "1", email: "ibrahim@example.com", password: "12345" },
-    { id: "2", email: "user2@example.com", password: "abcdef" },
-  ];
-
-  static login(email: string, password: string): LoginResult | null {
-    const user = this.users.find((u) => u.email === email && u.password === password);
-    if (!user) return null;
-
-    const payload: JwtPayload = { id: user.id, email: user.email };
-
-    const accessToken = JwtService.generateAccessToken(payload);
-    const refreshToken = JwtService.generateRefreshToken(payload);
-
-    return { accessToken, refreshToken, user };
-  }
 
   static refreshToken(refreshToken: string): string | null {
     try {
-      const decoded = JwtService.verifyRefreshToken(refreshToken) as any;
-
-      return JwtService.generateAccessToken({
+      const decoded = JwtService.verifyRefreshToken(refreshToken) as JwtBody;
+      // {
+      //   id
+      //   email
+      //   name
+      //   roles
+      //   imageUrl,
+      // }
+      console.log("decoded: ",decoded);
+      
+      const payload: JwtBody = {
         id: decoded.id,
         email: decoded.email,
-      });
+        name: decoded.name,
+        roles: decoded.roles,
+        imageUrl: decoded.imageUrl,
+      };
+
+      return JwtService.generateAccessToken(payload);
     } catch {
       return null;
     }

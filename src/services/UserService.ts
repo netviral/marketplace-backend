@@ -6,16 +6,16 @@ export default class UserService {
 
   static async getUserByEmail(email: string): Promise<User> {
     let user = await UserRepository.findByEmail(email);
-    if (user) return user;
-
-    const newUser = UserFactory.createNew("Ibrahim Khalil", email, ["user"]);
-    return await UserRepository.create(newUser);
+    if (user){
+      return user;
+    } else {
+      return UserFactory.createNew("","",email, ["user"]);
+    }
   }
 
-  static async registerUser(name: string, email: string, roles: string[] = ["user"]): Promise<User> {
-    const user = UserFactory.createNew(name, email, roles);
-    console.log(user);
-    return await UserRepository.create(user);
+  static async registerUser(name: string, imageUrl: string, email: string, roles: string[] = ["user"]): Promise<User> {
+    const user = UserFactory.createNew(name, imageUrl, email, roles);
+    return user;
   }
   
   static async verifyApiKey(email: string, apiKey: string): Promise<User | null> {

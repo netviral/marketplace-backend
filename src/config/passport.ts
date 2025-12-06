@@ -16,10 +16,9 @@ passport.use(
       try {
         // Example mapping
         const user = {
-          googleId: profile.id,
           email: profile.emails?.[0]?.value,
           name: profile.displayName,
-          avatar: profile.photos?.[0]?.value,
+          imageUrl: profile.photos?.[0]?.value,
         };
 
         // TODO: Save/find user in DB here

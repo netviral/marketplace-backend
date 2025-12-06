@@ -28,7 +28,7 @@ export class ApiResponse<T = unknown> implements APIResponse<T> {
   static error(
     code: number = 400,
     message: string,
-    error: string = "ERROR"
+    error: string = "ERROR",
   ): ApiResponse<null> {
     return new ApiResponse<null>(false, code, message, null, error);
   }

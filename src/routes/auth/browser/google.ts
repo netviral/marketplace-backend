@@ -3,7 +3,10 @@ import passport from "../../../config/passport.js";
 import { JwtService } from "../../../services/jwtService.js";
 import ensureGoogleRedirect  from "../../../middlewares/ensureGoogleRedirect.middleware.js";
 import { ApiResponse } from "../../../models/apiResponse.model.js";
+import JwtBody from "../../../models/jwt.payload.js";
 import { AuthMiddleware } from "../../../middlewares/auth.middleware.js";
+import ENV from "../../../env.js";
+
 
 const router = express.Router({ mergeParams: true });
 /**
@@ -32,17 +35,12 @@ router.get(
         return res.api(ApiResponse.error(401, "Authentication failed"));
       }
 
-      const user = req.user as { email: string; googleId: string };
-
+      const user = req.user as JwtBody;
+      console.log("OAuth callback user:", user);
       // Generate tokens
-      const accessToken = JwtService.generateAccessToken({
-        sub: user.googleId,
-        email: user.email,
-      });
+      const accessToken = JwtService.generateAccessToken(user);
 
-      const refreshToken = JwtService.generateRefreshToken({
-        sub: user.googleId,
-      });
+      const refreshToken = JwtService.generateRefreshToken(user);
 
       const cookieOptions = {
         httpOnly: true,
@@ -53,12 +51,12 @@ router.get(
 
       res.cookie("accessToken", accessToken, {
         ...cookieOptions,
-        maxAge: 1000 * 60 * 15,
+        maxAge: ENV.JWT_EXPIRES_IN_MS,
       });
 
       res.cookie("refreshToken", refreshToken, {
         ...cookieOptions,
-        maxAge: 1000 * 60 * 60 * 24 * 30,
+        maxAge: ENV.JWT_REFRESH_EXPIRES_IN_MS,
       });
 
       return res.redirect(`${process.env.FRONTEND_REDIRECT_URL}`);

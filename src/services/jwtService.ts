@@ -1,5 +1,6 @@
 import jwt, { JwtPayload, SignOptions, Secret } from "jsonwebtoken";
 import ENV from "../env.js";
+import JwtBody from "../models/jwt.payload.js";
 
 export class JwtService {
   private static readonly ACCESS_SECRET: Secret = ENV.JWT_ACCESS_SECRET;
@@ -12,7 +13,7 @@ export class JwtService {
     return { expiresIn } as SignOptions;
   }
 
-  static generateAccessToken(payload: object): string {
+  static generateAccessToken(payload: JwtBody): string {
     return jwt.sign(
       payload,
       this.ACCESS_SECRET,
@@ -20,7 +21,7 @@ export class JwtService {
     );
   }
 
-  static generateRefreshToken(payload: object): string {
+  static generateRefreshToken(payload: JwtBody): string {
     return jwt.sign(
       payload,
       this.REFRESH_SECRET,

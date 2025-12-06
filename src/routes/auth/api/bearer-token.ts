@@ -21,8 +21,16 @@ router.post("/login",  AuthMiddleware.isNotBearerAuthenticated, async (req: Requ
       return res.api(ApiResponse.error(401, "User does not Exist or Invalid credentials"));
     }
 
-    const accessToken = JwtService.generateAccessToken({ email });
-    const refreshToken = JwtService.generateRefreshToken({ email });
+    const payload =  {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        roles: user.roles,
+        imageUrl: user.imageUrl,
+    };
+
+    const accessToken = JwtService.generateAccessToken(payload);
+    const refreshToken = JwtService.generateRefreshToken(payload);
 
     return res.api(
       ApiResponse.success(200, "Login successful", {

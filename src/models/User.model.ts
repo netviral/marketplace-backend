@@ -1,15 +1,16 @@
-import BaseModel from "./Base.model.js";
-
-export default class User extends BaseModel {
+export default class User {
+    private _id: string;
     private _name: string;
     private _email: string;
+    private _imageUrl: string;
     private _roles: string[];
     private _isActive? : boolean;
     private _isBlocked? : boolean;
     private _apiKey? : string;
 
-    constructor(id: string, name: string, email: string, roles: string[]) {
-        super(id);
+    constructor(id: string, imageUrl:string, name: string, email: string, roles: string[]) {
+        this._id = id;
+        this._imageUrl = imageUrl;
         this._name = name;
         this._email = email;
         this._roles = roles;
@@ -21,6 +22,9 @@ export default class User extends BaseModel {
     public get isActive() { return this._isActive; }
     public get isBlocked() { return this._isBlocked; }
     public get apiKey() { return this._apiKey; }
+    public get id() { return this._id; }
+    public get imageUrl() { return this._imageUrl; }
+    
     public hasRole(role: string): boolean {
         return this._roles.includes(role);
     }

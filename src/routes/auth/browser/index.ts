@@ -42,7 +42,7 @@ router.get("/me", async (req: Request, res: Response) => {
     }
 
     return res.api(
-      ApiResponse.success(200, "User fetched", { user })
+      ApiResponse.success(200, "User fetched", { isSignedIn:true, user })
     );
   } catch (err) {
     console.error("ME error:", err);
@@ -58,6 +58,7 @@ router.get("/me", async (req: Request, res: Response) => {
 
 router.post("/refresh", (req: Request, res: Response) => {
   const refreshToken = req.cookies?.refreshToken;
+  console.log("REFRESH token:", refreshToken);
 
   if (!refreshToken) {
     return res.api(
@@ -66,6 +67,7 @@ router.post("/refresh", (req: Request, res: Response) => {
   }
 
   const newAccessToken = AuthService.refreshToken(refreshToken);
+  console.log("NEW ACCESS TOKEN:", newAccessToken);
 
   if (!newAccessToken) {
     return res.api(
