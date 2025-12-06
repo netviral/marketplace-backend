@@ -3,6 +3,7 @@ import { AuthService } from "../../../services/AuthService.js";
 import { JwtService } from "../../../services/jwtService.js";
 import { ApiResponse } from "../../../models/apiResponse.model.js";
 import UserService from "../../../services/UserService.js";
+import { AuthMiddleware } from "../../../middlewares/auth.middleware.js";
 
 const router = express.Router();
 router.use(express.json());
@@ -11,7 +12,7 @@ router.use(express.json());
  * LOGIN — Verify API Key and issue tokens
  * Issues both accessToken and refreshToken
  */
-router.post("/login", async (req: Request, res: Response) => {
+router.post("/login",  AuthMiddleware.isNotBearerAuthenticated, async (req: Request, res: Response) => {
   try {
     const { email, apiKey } = req.body;
 

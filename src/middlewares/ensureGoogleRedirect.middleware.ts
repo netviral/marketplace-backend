@@ -2,12 +2,11 @@ import { Request, Response, NextFunction } from "express";
 import { ApiResponse } from "../models/apiResponse.model.js";
 
 export default function ensureGoogleRedirect(req: Request, res: Response, next: NextFunction) {
-  const { code, state } = req.query;
+  const { code } = req.query;
 
   // Google OAuth ALWAYS sends both:
   // - code (auth code)
-  // - state (CSRF token)
-  if (!code || !state) {
+  if (!code) {
     return res.api(
       ApiResponse.error(
         403,

@@ -1,35 +1,30 @@
 import express, { Request, Response } from "express";
 import passport from "../../../config/passport.js";
 import { JwtService } from "../../../services/jwtService.js";
-import { AuthMiddleware } from "../../../middlewares/auth.middleware.js";
 import ensureGoogleRedirect  from "../../../middlewares/ensureGoogleRedirect.middleware.js";
-import UserService from "../../../services/UserService.js";
 import { ApiResponse } from "../../../models/apiResponse.model.js";
-import { JwtPayload } from "jsonwebtoken";
+import { AuthMiddleware } from "../../../middlewares/auth.middleware.js";
 
 const router = express.Router({ mergeParams: true });
-
-// ---- Custom JWT Payload ----
-interface AppJwtPayload extends JwtPayload {
-  email: string;
-  sub: string; // googleId
-}
-
 /**
  * /auth/browser/google
  * Browser-initiated OAuth flow
  */
+
 router.get(
-  "/google",
+  "/",
   AuthMiddleware.isNotCookieAuthenticated,
-  passport.authenticate("google", { scope: ["profile", "email"] })
+  passport.authenticate("google", { scope: ["profile", "email"] }),
+  async (req: Request, res: Response) => {
+    console.log("Initiating Google OAuth flow");
+  }
 );
 
 /**
  * /auth/browser/google/callback
  */
 router.get(
-  "/google/callback", ensureGoogleRedirect, 
+  "/callback", ensureGoogleRedirect, 
   passport.authenticate("google", { session: false }),
   async (req: Request, res: Response) => {
     try {

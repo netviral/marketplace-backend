@@ -6,7 +6,7 @@ import UserService from "../../../services/UserService.js";
 import { ApiResponse } from "../../../models/apiResponse.model.js";
 import { JwtPayload } from "jsonwebtoken";
 import { AuthService } from "../../../services/AuthService.js";
-import googleBrowserAuthRouter from "./google.js";
+import googleRouter from "./google.js";
 
 const app = express();
 app.use(express.json());
@@ -18,7 +18,7 @@ interface AppJwtPayload extends JwtPayload {
 
 const router = express.Router({ mergeParams: true });
 
-app.use("/google", googleBrowserAuthRouter);
+router.use("/google", googleRouter);
 
 router.get("/me", async (req: Request, res: Response) => {
   try {
@@ -49,6 +49,7 @@ router.get("/me", async (req: Request, res: Response) => {
     return res.api(ApiResponse.error(401, "Invalid or expired token"));
   }
 });
+
 
 /**
  * /auth/browser/logout

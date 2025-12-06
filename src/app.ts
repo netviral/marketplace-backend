@@ -1,19 +1,16 @@
 import express, {Request, Response, NextFunction} from 'express';
-import userRouter from './routes/users/index.js';
-import authRouter from "./routes/auth/api/bearer-token.js";
+import mainRouter from './routes/index.js';
 import { AuthMiddleware } from "./middlewares/auth.middleware.js";
 import bodyParser from "body-parser";
 import { apiResponseMiddleware } from "./middlewares/apiResponse.middleware.js";
 import passport from "./config/passport.js";
-import BrowserAuthRouter from "./routes/auth/browser/index.js";
-import ApiAuthRouter from "./routes/auth/api/bearer-token.js";
+import AuthRouter from "./routes/auth/index.js";
 import session from "express-session";
 import cookieParser from "cookie-parser";
 import { ApiResponse } from './models/apiResponse.model.js';
 
 
 const app = express();
-
 app.use(bodyParser.urlencoded({ extended: true })); // parses URL-encoded forms
 app.use(apiResponseMiddleware); // important
 app.use(express.json()); // built-in body parser for JSON
@@ -29,14 +26,13 @@ app.use(cookieParser());
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Google OAuth routes
-app.use("/auth/browser", BrowserAuthRouter);
+app.use("/auth", AuthRouter);
 
-app.use("/auth/api", ApiAuthRouter);
+// allow API access to all routes with bearer token auth, prefixed with /api
+app.use('/api', AuthMiddleware.isBearerAuthenticated, mainRouter);
 
-app.use("/auth", authRouter);
-
-app.use('/users', AuthMiddleware.isBearerAuthenticated, userRouter);
+// allow browser access to same routes with cookie auth
+app.use('/', mainRouter);
 
 app.use((req: Request, res: Response) => {
     res.api(ApiResponse.error(404, "Resource not found"));
