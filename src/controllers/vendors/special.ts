@@ -34,6 +34,6 @@ export const verifyVendor = async (req: Request, res: Response): Promise<void> =
         res.api(ApiResponse.success(200, "Vendor verified successfully", vendor));
     } catch (error) {
         console.error("Error verifying vendor:", error);
-        res.api(ApiResponse.error(500, "Error verifying vendor", "server_error"));
+        res.api(ApiResponse.error(500, "Error verifying vendor", error));
     }
 };

@@ -8,33 +8,24 @@ import { prisma } from "../../config/database.config.js";
 import { ApiResponse } from "../../models/apiResponse.model.js";
 import User from "../../models/User.model.js";
 
+import { QueryService } from "../../services/QueryService.js";
+
 /**
  * Get all vendors (public access)
  * @route GET /vendors
  * @access Public
+ * @query page - Page number (default: 1)
+ * @query limit - Items per page (default: 10)
+ * @query sort - Sort field (e.g. "createdAt:desc")
+ * @query search - Search term for name or description
+ * @query isVerified - Filter by verification status
  */
 export const getAllVendors = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { verified, search } = req.query;
-
-        // Build where clause
-        const where: Record<string, unknown> = {};
-
-        // Filter by verification status
-        if (verified !== undefined) {
-            where.isVerified = verified === 'true';
-        }
-
-        // Search by name or description
-        if (search) {
-            where.OR = [
-                { name: { contains: search as string, mode: 'insensitive' } },
-                { description: { contains: search as string, mode: 'insensitive' } }
-            ];
-        }
-
-        const vendors = await prisma.vendor.findMany({
-            where: where as any,
+        const result = await QueryService.query(prisma.vendor, req.query, {
+            searchFields: ['name', 'description'],
+            allowedFilters: ['isVerified'],
+            defaultSort: 'createdAt:desc',
             select: {
                 id: true,
                 name: true,
@@ -43,14 +34,13 @@ export const getAllVendors = async (req: Request, res: Response): Promise<void> 
                 categories: true,
                 isVerified: true,
                 createdAt: true
-            },
-            orderBy: { createdAt: 'desc' }
+            }
         });
 
-        res.api(ApiResponse.success(200, "Vendors fetched successfully", vendors));
+        res.api(ApiResponse.success(200, "Vendors fetched successfully", result));
     } catch (error) {
         console.error("Error fetching vendors:", error);
-        res.api(ApiResponse.error(500, "Error fetching vendors", "server_error"));
+        res.api(ApiResponse.error(500, "Error fetching vendors", error));
     }
 };
 
@@ -107,7 +97,7 @@ export const getVendorById = async (req: Request, res: Response): Promise<void> 
         res.api(ApiResponse.success(200, "Vendor fetched successfully", vendor));
     } catch (error) {
         console.error("Error fetching vendor:", error);
-        res.api(ApiResponse.error(500, "Error fetching vendor", "server_error"));
+        res.api(ApiResponse.error(500, "Error fetching vendor", error));
     }
 };
 
@@ -145,7 +135,7 @@ export const getMyVendors = async (req: Request, res: Response): Promise<void> =
         res.api(ApiResponse.success(200, "My vendors fetched successfully", vendors));
     } catch (error) {
         console.error("Error fetching my vendors:", error);
-        res.api(ApiResponse.error(500, "Error fetching my vendors", "server_error"));
+        res.api(ApiResponse.error(500, "Error fetching my vendors", error));
     }
 };
 
@@ -211,6 +201,6 @@ export const getMyVendorById = async (req: Request, res: Response): Promise<void
         res.api(ApiResponse.success(200, "Vendor fetched successfully", vendor));
     } catch (error) {
         console.error("Error fetching vendor:", error);
-        res.api(ApiResponse.error(500, "Error fetching vendor", "server_error"));
+        res.api(ApiResponse.error(500, "Error fetching vendor", error));
     }
 };

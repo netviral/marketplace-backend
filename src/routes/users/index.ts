@@ -67,15 +67,15 @@ router.get("/me", async (req: Request, res: Response): Promise<void> => {
     res.api(ApiResponse.success(200, "User profile fetched successfully", user));
   } catch (err: any) {
     console.error("Error fetching user profile:", err);
-    res.api(ApiResponse.error(500, "Failed to fetch user profile", "server_error"));
+    res.api(ApiResponse.error(500, "Failed to fetch user profile", err));
   }
 });
 
 /**
  * Get user by ID
  * @route GET /users/:id
- * @access Public
- * @description Returns public profile information for a specific user
+ * @access Private
+ * @description (Global Auth) Returns public profile information for a specific user (requires login)
  */
 router.get("/:id", async (req: Request, res: Response): Promise<void> => {
   try {
@@ -93,7 +93,7 @@ router.get("/:id", async (req: Request, res: Response): Promise<void> => {
     res.api(ApiResponse.error(404, "User not found", "user_not_found"));
   } catch (err: any) {
     console.error("Error fetching user:", err);
-    res.api(ApiResponse.error(500, "Failed to fetch user", "server_error"));
+    res.api(ApiResponse.error(500, "Failed to fetch user", err));
   }
 });
 
@@ -124,7 +124,7 @@ router.put("/me", async (req: Request, res: Response): Promise<void> => {
     res.api(ApiResponse.success(200, "User profile updated successfully", { name, phone, address, imageUrl }));
   } catch (err: any) {
     console.error("Error updating user:", err);
-    res.api(ApiResponse.error(500, "Failed to update user", "server_error"));
+    res.api(ApiResponse.error(500, "Failed to update user", err));
   }
 });
 
@@ -151,7 +151,7 @@ router.put("/:id", async (req: Request, res: Response): Promise<void> => {
     res.api(ApiResponse.success(200, "User updated successfully", { name, roles }));
   } catch (err: any) {
     console.error("Error updating user:", err);
-    res.api(ApiResponse.error(500, "Failed to update user", "server_error"));
+    res.api(ApiResponse.error(500, "Failed to update user", err));
   }
 });
 
@@ -181,7 +181,7 @@ router.delete("/:id", async (req: Request, res: Response): Promise<void> => {
     res.api(ApiResponse.success(200, "User deleted successfully", null));
   } catch (err: any) {
     console.error("Error deleting user:", err);
-    res.api(ApiResponse.error(500, "Failed to delete user", "server_error"));
+    res.api(ApiResponse.error(500, "Failed to delete user", err));
   }
 });
 

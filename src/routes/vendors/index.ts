@@ -56,7 +56,8 @@ router.get("/me/:id", VendorsController.getMyVendorById);
 /**
  * Get all vendors (public)
  * @route GET /vendors
- * @access Public
+ * @access Private
+ * @description (Global Auth) Get all vendors (public read, but requires login)
  * @query verified - Filter by verification status (true/false)
  * @query search - Search by name or description
  * @description Returns all vendors with optional filtering
@@ -66,7 +67,8 @@ router.get("/", VendorsController.getAllVendors);
 /**
  * Get vendor by ID (public)
  * @route GET /vendors/:id
- * @access Public
+ * @access Private
+ * @description (Global Auth) Get vendor by ID (public read, but requires login)
  * @description Returns detailed information about a specific vendor
  */
 router.get("/:id", VendorsController.getVendorById);
@@ -122,7 +124,8 @@ router.post("/:vendorId/listings", ListingsController.createListing);
 /**
  * Get all listings for a specific vendor
  * @route GET /vendors/:vendorId/listings
- * @access Public
+ * @access Private
+ * @description (Global Auth) Returns all listings belonging to a specific vendor (requires login)
  * @description Returns all listings belonging to a specific vendor
  */
 router.get("/:vendorId/listings", ListingsController.getVendorListings);

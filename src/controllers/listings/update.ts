@@ -95,6 +95,6 @@ export const updateListing = async (req: Request, res: Response): Promise<void> 
         res.api(ApiResponse.success(200, "Listing updated successfully", listing));
     } catch (error) {
         console.error("Error updating listing:", error);
-        res.api(ApiResponse.error(500, "Error updating listing", "server_error"));
+        res.api(ApiResponse.error(500, "Error updating listing", error));
     }
 };

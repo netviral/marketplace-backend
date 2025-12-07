@@ -42,6 +42,7 @@ src/
 ## 🔐 Authentication
 
  The application supports **JWT-based authentication** with support for browser cookies and direct API usage.
+ **Note on Global Authentication**: The application enforces `isCookieAuthenticated` middleware globally on the root API router. This means **all** routes documented below (except Auth initialization) require a valid authentication cookie to be accessed, effectively making "Public" routes accessible only to logged-in users.
 
 ### **Methods**
 1.  **Direct API (Bearer Token)**:
@@ -72,15 +73,15 @@ Base URL: `/api/vendors` (or `/vendors` depending on mount)
 | **GET** | `/vendors/me/:id` | Owner | Get specific owned vendor details |
 | **PUT** | `/vendors/me/:id` | Owner | Update vendor details |
 | **DELETE** | `/vendors/me/:id` | Owner | Delete a vendor |
-| **GET** | `/vendors` | Public | List vendors (Filter from params: `verified`, `search`) |
-| **GET** | `/vendors/:id` | Public | Get public vendor profile |
+| **GET** | `/vendors` | Registered | List vendors (Supports `page`, `limit`, `sort`, `search`, `isVerified`) |
+| **GET** | `/vendors/:id` | Registered | Get vendor profile |
 | **POST** | `/vendors/:id/verify` | Admin | **Admin**: Verify a vendor |
 
 #### **Nested: Vendor Listings**
 | Method | Endpoint | Access | Description |
 |:---|:---|:---|:---|
 | **POST** | `/vendors/:vendorId/listings` | Vendor | Create a listing under a vendor |
-| **GET** | `/vendors/:vendorId/listings` | Public | Get all listings for a specific vendor |
+| **GET** | `/vendors/:vendorId/listings` | Registered | Get all listings for a specific vendor |
 | **PUT** | `/vendors/:vendorId/listings/:id` | Vendor | Update a listing |
 | **DELETE** | `/vendors/:vendorId/listings/:id` | Vendor | Delete a listing |
 
@@ -95,12 +96,15 @@ Base URL: `/api/vendors` (or `/vendors` depending on mount)
 ---
 
 ### **2. Listings (`/listings`)**
-Base URL: `/api/listings` - **Public Access Only**
+Base URL: `/api/listings`
 
 | Method | Endpoint | Access | Description |
 |:---|:---|:---|:---|
-| **GET** | `/listings` | Public | Get all listings. **Filters**: `search`, `sort`, `tags`, `type`. |
-| **GET** | `/listings/:id` | Public | Get listing details |
+| **GET** | `/listings` | Registered | Get all listings. **Advanced params**: `page`, `limit`, `sort`, `search`, `tags`, `type`, `vendorId`. |
+| **GET** | `/listings/:id` | Registered | Get listing details |
+| **POST** | `/listings` | Vendor | Create a listing (Must provide `vendorId` in body) |
+| **PUT** | `/listings/:id` | Vendor Owner | Update a listing (User must own the vendor) |
+| **DELETE** | `/listings/:id` | Vendor Owner | Delete a listing (User must own the vendor) |
 
 ---
 
@@ -114,6 +118,7 @@ Base URL: `/api/orders` - **User Order Management**
 | **GET** | `/orders/me/:id` | User | View details of a purchase |
 | **GET** | `/orders/me/stats` | User | View my buying statistics |
 | **PUT** | `/orders/me/:id` | User | Cancel a pending order or update notes |
+| **DELETE** | `/orders/:id` | Admin | **Admin**: Permanently delete an order |
 
 ---
 
@@ -124,7 +129,7 @@ Base URL: `/api/users`
 |:---|:---|:---|:---|
 | **GET** | `/users/me` | User | Get my user profile |
 | **PUT** | `/users/me` | User | Update my user profile |
-| **GET** | `/users/:id` | Public | Get public user profile |
+| **GET** | `/users/:id` | Registered | Get public user profile |
 
 ---
 

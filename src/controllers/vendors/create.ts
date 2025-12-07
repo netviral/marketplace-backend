@@ -77,6 +77,6 @@ export const createVendor = async (req: Request, res: Response): Promise<void> =
         res.api(ApiResponse.success(201, "Vendor created successfully", vendor));
     } catch (error) {
         console.error("Error creating vendor:", error);
-        res.api(ApiResponse.error(500, "Error creating vendor", "server_error"));
+        res.api(ApiResponse.error(500, "Error creating vendor", error));
     }
 };

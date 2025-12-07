@@ -12,7 +12,7 @@ router.use(express.json());
  * LOGIN — Verify API Key and issue tokens
  * Issues both accessToken and refreshToken
  */
-router.post("/login",  AuthMiddleware.isNotBearerAuthenticated, async (req: Request, res: Response) => {
+router.post("/login", AuthMiddleware.isNotBearerAuthenticated, async (req: Request, res: Response) => {
   try {
     const { email, apiKey } = req.body;
 
@@ -21,12 +21,12 @@ router.post("/login",  AuthMiddleware.isNotBearerAuthenticated, async (req: Requ
       return res.api(ApiResponse.error(401, "User does not Exist or Invalid credentials"));
     }
 
-    const payload =  {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        roles: user.roles,
-        imageUrl: user.imageUrl,
+    const payload = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      roles: user.roles,
+      imageUrl: user.imageUrl,
     };
 
     const accessToken = JwtService.generateAccessToken(payload);
@@ -41,7 +41,7 @@ router.post("/login",  AuthMiddleware.isNotBearerAuthenticated, async (req: Requ
     );
   } catch (err) {
     console.error("LOGIN error:", err);
-    return res.api(ApiResponse.error(500, "Internal server error"));
+    return res.api(ApiResponse.error(500, "Internal server error", err));
   }
 });
 

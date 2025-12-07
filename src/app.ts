@@ -33,7 +33,7 @@ app.use("/auth", AuthRouter);
 app.use('/api', AuthMiddleware.isBearerAuthenticated, mainRouter);
 
 // allow browser access to same routes with cookie auth
-app.use('/', mainRouter);
+app.use('/', AuthMiddleware.isCookieAuthenticated, mainRouter);
 
 app.use((req: Request, res: Response) => {
   res.api(ApiResponse.error(404, "Resource not found"));

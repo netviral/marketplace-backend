@@ -125,6 +125,6 @@ export const createListing = async (req: Request, res: Response): Promise<void> 
         res.api(ApiResponse.success(201, "Listing created successfully", listing));
     } catch (error) {
         console.error("Error creating listing:", error);
-        res.api(ApiResponse.error(500, "Error creating listing", "server_error"));
+        res.api(ApiResponse.error(500, "Error creating listing", error));
     }
 };

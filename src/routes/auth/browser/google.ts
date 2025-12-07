@@ -62,7 +62,7 @@ router.get(
       return res.redirect(`${process.env.FRONTEND_REDIRECT_URL}`);
     } catch (err) {
       console.error("OAuth callback error:", err);
-      return res.api(ApiResponse.error(500, "Internal Server Error"));
+      return res.api(ApiResponse.error(500, "Internal Server Error", err));
     }
   }
 );

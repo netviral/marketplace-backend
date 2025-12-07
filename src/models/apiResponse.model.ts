@@ -3,7 +3,7 @@ export interface APIResponse<T = unknown> {
   code: number;
   message: string;
   data: T | null;
-  error: string | null;
+  error: any;
 }
 
 export class ApiResponse<T = unknown> implements APIResponse<T> {
@@ -12,9 +12,9 @@ export class ApiResponse<T = unknown> implements APIResponse<T> {
     public code: number,
     public message: string,
     public data: T | null,
-    public error: string | null
-  ) {}
-  
+    public error: any
+  ) { }
+
   /** Success response (data required) */
   static success<T>(
     code: number = 200,
@@ -28,8 +28,24 @@ export class ApiResponse<T = unknown> implements APIResponse<T> {
   static error(
     code: number = 400,
     message: string,
-    error: string = "ERROR",
-  ): ApiResponse<null> {
-    return new ApiResponse<null>(false, code, message, null, error);
+    error: string | Error | unknown = "ERROR",
+  ): ApiResponse<any> {
+    let errorDetail: any = error;
+
+    // If it's an Error object, we might want to expose details in non-production
+    if (error instanceof Error) {
+      if (process.env.NODE_ENV !== 'production') {
+        errorDetail = {
+          message: error.message,
+          name: error.name,
+          stack: error.stack
+        };
+      } else {
+        // In production, keep it generic unless it's a known safe error
+        errorDetail = "Internal Server Error";
+      }
+    }
+
+    return new ApiResponse<any>(false, code, message, null, errorDetail);
   }
 }

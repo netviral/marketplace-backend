@@ -28,6 +28,6 @@ export const deleteListing = async (req: Request, res: Response): Promise<void> 
         res.api(ApiResponse.success(200, "Listing deleted successfully", null));
     } catch (error) {
         console.error("Error deleting listing:", error);
-        res.api(ApiResponse.error(500, "Error deleting listing", "server_error"));
+        res.api(ApiResponse.error(500, "Error deleting listing", error));
     }
 };

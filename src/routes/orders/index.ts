@@ -69,6 +69,18 @@ router.get("/me/stats", OrdersController.getMyOrderStats);
 router.put("/me/:id", OrdersController.updateMyOrder);
 
 // ============================================
+// DELETE OPERATIONS
+// ============================================
+
+/**
+ * Delete order (Admin only)
+ * @route DELETE /orders/:id
+ * @access Private - Admin only
+ * @description Permanently deletes an order
+ */
+router.delete("/:id", OrdersController.deleteOrder);
+
+// ============================================
 // EXPORT
 // ============================================
 

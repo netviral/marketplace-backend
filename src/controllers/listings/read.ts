@@ -12,41 +12,29 @@ import { ApiResponse } from "../../models/apiResponse.model.js";
  * @route GET /listings
  * @access Public
  */
+import { QueryService } from "../../services/QueryService.js";
+
+/**
+ * Get all listings with filters
+ * @route GET /listings
+ * @access Public
+ * @query page - Page number
+ * @query limit - Per page limit
+ * @query search - Search by name/description
+ * @query sort - Sort order e.g. "price:asc,createdAt:desc"
+ * @query vendorId - Exact match
+ * @query type - Exact match
+ * @query tags - Comma separated tags
+ */
 export const getAllListings = async (req: Request, res: Response): Promise<void> => {
     try {
-        const {
-            search = "",
-            sort = "createdAt:desc",
-            tags = "",
-            vendorId = "",
-            type = ""
-        } = req.query;
+        const { tags } = req.query;
+        const additionalWhere: any = {};
 
-        // Build where clause
-        const where: Record<string, unknown> = {};
-
-        // Search filter
-        if (search) {
-            where.OR = [
-                { name: { contains: search as string, mode: 'insensitive' } },
-                { description: { contains: search as string, mode: 'insensitive' } }
-            ];
-        }
-
-        // Vendor filter
-        if (vendorId) {
-            where.vendorId = vendorId as string;
-        }
-
-        // Type filter
-        if (type) {
-            where.type = type as any;
-        }
-
-        // Tags filter
+        // Tags filter logic
         if (tags) {
             const tagArray = (tags as string).split(',').map(t => t.trim());
-            where.tags = {
+            additionalWhere.tags = {
                 some: {
                     name: {
                         in: tagArray
@@ -55,15 +43,10 @@ export const getAllListings = async (req: Request, res: Response): Promise<void>
             };
         }
 
-        // Parse sort parameter
-        const [sortField = "createdAt", sortOrder = "desc"] = (sort as string).split(":");
-        const orderBy: Record<string, string> = {
-            [sortField]: sortOrder
-        };
-
-        const listings = await prisma.listing.findMany({
-            where: where as any,
-            orderBy: orderBy as any,
+        const result = await QueryService.query(prisma.listing, req.query, {
+            searchFields: ['name', 'description'],
+            allowedFilters: ['vendorId', 'type', 'isAvailable', 'inventoryType'],
+            additionalWhere,
             include: {
                 vendor: {
                     select: {
@@ -76,10 +59,10 @@ export const getAllListings = async (req: Request, res: Response): Promise<void>
             }
         });
 
-        res.api(ApiResponse.success(200, "Listings fetched successfully", listings));
+        res.api(ApiResponse.success(200, "Listings fetched successfully", result));
     } catch (error) {
         console.error("Error fetching listings:", error);
-        res.api(ApiResponse.error(500, "Error fetching listings", "server_error"));
+        res.api(ApiResponse.error(500, "Error fetching listings", error));
     }
 };
 
@@ -133,7 +116,7 @@ export const getListingById = async (req: Request, res: Response): Promise<void>
         res.api(ApiResponse.success(200, "Listing fetched successfully", listing));
     } catch (error) {
         console.error("Error fetching listing:", error);
-        res.api(ApiResponse.error(500, "Error fetching listing", "server_error"));
+        res.api(ApiResponse.error(500, "Error fetching listing", error));
     }
 };
 
@@ -167,6 +150,6 @@ export const getVendorListings = async (req: Request, res: Response): Promise<vo
         res.api(ApiResponse.success(200, "Vendor listings fetched successfully", listings));
     } catch (error) {
         console.error("Error fetching vendor listings:", error);
-        res.api(ApiResponse.error(500, "Error fetching vendor listings", "server_error"));
+        res.api(ApiResponse.error(500, "Error fetching vendor listings", error));
     }
 };

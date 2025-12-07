@@ -74,6 +74,6 @@ export const updateVendor = async (req: Request, res: Response): Promise<void> =
         res.api(ApiResponse.success(200, "Vendor updated successfully", vendor));
     } catch (error) {
         console.error("Error updating vendor:", error);
-        res.api(ApiResponse.error(500, "Error updating vendor", "server_error"));
+        res.api(ApiResponse.error(500, "Error updating vendor", error));
     }
 };

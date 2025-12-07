@@ -46,7 +46,7 @@ export const getMyOrders = async (req: Request, res: Response): Promise<void> =>
         res.api(ApiResponse.success(200, "User orders fetched successfully", orders));
     } catch (error) {
         console.error("Error fetching user orders:", error);
-        res.api(ApiResponse.error(500, "Error fetching user orders", "server_error"));
+        res.api(ApiResponse.error(500, "Error fetching user orders", error));
     }
 };
 
@@ -102,7 +102,7 @@ export const getMyOrderById = async (req: Request, res: Response): Promise<void>
         res.api(ApiResponse.success(200, "Order fetched successfully", order));
     } catch (error) {
         console.error("Error fetching order:", error);
-        res.api(ApiResponse.error(500, "Error fetching order", "server_error"));
+        res.api(ApiResponse.error(500, "Error fetching order", error));
     }
 };
 
@@ -141,7 +141,7 @@ export const getMyOrderStats = async (req: Request, res: Response): Promise<void
         res.api(ApiResponse.success(200, "User order statistics fetched successfully", stats));
     } catch (error) {
         console.error("Error fetching user order stats:", error);
-        res.api(ApiResponse.error(500, "Error fetching user order statistics", "server_error"));
+        res.api(ApiResponse.error(500, "Error fetching user order statistics", error));
     }
 };
 
@@ -222,7 +222,7 @@ export const getVendorOrders = async (req: Request, res: Response): Promise<void
         res.api(ApiResponse.success(200, "Vendor orders fetched successfully", orders));
     } catch (error) {
         console.error("Error fetching vendor orders:", error);
-        res.api(ApiResponse.error(500, "Error fetching vendor orders", "server_error"));
+        res.api(ApiResponse.error(500, "Error fetching vendor orders", error));
     }
 };
 
@@ -308,7 +308,7 @@ export const getVendorOrderById = async (req: Request, res: Response): Promise<v
         res.api(ApiResponse.success(200, "Order fetched successfully", order));
     } catch (error) {
         console.error("Error fetching vendor order:", error);
-        res.api(ApiResponse.error(500, "Error fetching vendor order", "server_error"));
+        res.api(ApiResponse.error(500, "Error fetching vendor order", error));
     }
 };
 
@@ -371,6 +371,6 @@ export const getVendorOrderStats = async (req: Request, res: Response): Promise<
         res.api(ApiResponse.success(200, "Vendor order statistics fetched successfully", stats));
     } catch (error) {
         console.error("Error fetching vendor order stats:", error);
-        res.api(ApiResponse.error(500, "Error fetching vendor order statistics", "server_error"));
+        res.api(ApiResponse.error(500, "Error fetching vendor order statistics", error));
     }
 };

@@ -78,7 +78,7 @@ export const updateMyOrder = async (req: Request, res: Response): Promise<void> 
         res.api(ApiResponse.success(200, "Order updated successfully", order));
     } catch (error) {
         console.error("Error updating order:", error);
-        res.api(ApiResponse.error(500, "Error updating order", "server_error"));
+        res.api(ApiResponse.error(500, "Error updating order", error));
     }
 };
 
@@ -202,6 +202,6 @@ export const updateVendorOrder = async (req: Request, res: Response): Promise<vo
         res.api(ApiResponse.success(200, "Order updated successfully", order));
     } catch (error) {
         console.error("Error updating vendor order:", error);
-        res.api(ApiResponse.error(500, "Error updating vendor order", "server_error"));
+        res.api(ApiResponse.error(500, "Error updating vendor order", error));
     }
 };

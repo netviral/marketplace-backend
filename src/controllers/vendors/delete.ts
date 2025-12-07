@@ -28,6 +28,6 @@ export const deleteVendor = async (req: Request, res: Response): Promise<void> =
         res.api(ApiResponse.success(200, "Vendor deleted successfully", null));
     } catch (error) {
         console.error("Error deleting vendor:", error);
-        res.api(ApiResponse.error(500, "Error deleting vendor", "server_error"));
+        res.api(ApiResponse.error(500, "Error deleting vendor", error));
     }
 };

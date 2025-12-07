@@ -12,3 +12,6 @@ export * from "./read.js";
 
 // Update operations
 export * from "./update.js";
+
+// Delete operations
+export * from "./delete.js";

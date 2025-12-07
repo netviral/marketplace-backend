@@ -97,6 +97,6 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
         res.api(ApiResponse.success(201, "Order created successfully", order));
     } catch (error) {
         console.error("Error creating order:", error);
-        res.api(ApiResponse.error(500, "Error creating order", "server_error"));
+        res.api(ApiResponse.error(500, "Error creating order", error));
     }
 };
