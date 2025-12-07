@@ -15,7 +15,7 @@ import User from "../../models/User.model.js";
  */
 export const createVendor = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { name, description, contactEmail, contactPhone, categories, logo } = req.body;
+        const { name, description, contactEmail, contactPhone, categories, logo, paymentInformation, upiId } = req.body;
         const user = req.user as User | undefined;
 
         // Check authentication
@@ -59,6 +59,8 @@ export const createVendor = async (req: Request, res: Response): Promise<void> =
                 contactPhone,
                 categories,
                 logo,
+                paymentInformation,
+                upiId,
                 owners: {
                     connect: { email: user.email }
                 }

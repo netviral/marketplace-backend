@@ -15,7 +15,7 @@ import { ApiResponse } from "../../models/apiResponse.model.js";
 export const updateVendor = async (req: Request, res: Response): Promise<void> => {
     try {
         const { id } = req.params;
-        const { name, description, contactEmail, contactPhone, categories, logo } = req.body;
+        const { name, description, contactEmail, contactPhone, categories, logo, paymentInformation, upiId } = req.body;
 
         if (!id) {
             res.api(ApiResponse.error(400, "Vendor ID is required", "missing_vendor_id"));
@@ -56,6 +56,8 @@ export const updateVendor = async (req: Request, res: Response): Promise<void> =
         if (contactPhone !== undefined) updateData.contactPhone = contactPhone;
         if (categories !== undefined) updateData.categories = categories;
         if (logo !== undefined) updateData.logo = logo;
+        if (paymentInformation !== undefined) updateData.paymentInformation = paymentInformation;
+        if (upiId !== undefined) updateData.upiId = upiId;
 
         const vendor = await prisma.vendor.update({
             where: { id },

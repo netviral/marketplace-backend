@@ -95,6 +95,19 @@ const envSchema = z.object({
                 .map((s) => s.trim())
                 .filter(Boolean)
         ),
+
+    // Email Configuration (Nodemailer)
+    SMTP_HOST: z.string().min(1, "SMTP_HOST is required"),
+    SMTP_PORT: z.string().transform((val, ctx) => {
+        const num = Number(val);
+        if (isNaN(num)) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, message: "SMTP_PORT must be a number" });
+            return z.NEVER;
+        }
+        return num;
+    }),
+    SMTP_USER: z.string().min(1, "SMTP_USER is required"),
+    SMTP_PASS: z.string().min(1, "SMTP_PASS is required")
 });
 
 // ============================================

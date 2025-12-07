@@ -133,6 +133,17 @@ Base URL: `/api/users`
 
 ---
 
+### **5. Wishlist (`/wishlist`)**
+Base URL: `/api/wishlist`
+
+| Method | Endpoint | Access | Description |
+|:---|:---|:---|:---|
+| **GET** | `/wishlist/me` | User | Get my wishlist items (Supports pagination/search) |
+| **POST** | `/wishlist/:listingId` | User | Add listing to wishlist |
+| **DELETE** | `/wishlist/:listingId` | User | Remove listing from wishlist |
+
+---
+
 ## 🕹 Controllers
 
 Controllers are **modularized** to prevent large files and separate concerns.

@@ -9,6 +9,7 @@ import vendorsRouter from "./vendors/index.js";
 import listingsRouter from "./listings/index.js";
 import usersRouter from "./users/index.js";
 import ordersRouter from "./orders/index.js";
+import wishlistRouter from "./wishlist/index.js";
 
 // ============================================
 // ROUTER SETUP
@@ -56,6 +57,15 @@ router.use("/users", usersRouter);
  * - /orders/me - User's orders
  */
 router.use("/orders", ordersRouter);
+
+/**
+ * Wishlist routes
+ * Mounted at: /wishlist
+ * Handles:
+ * - /wishlist/me - Get wishlist
+ * - /wishlist/:listingId - Add/Remove
+ */
+router.use("/wishlist", wishlistRouter);
 
 // ============================================
 // EXPORT

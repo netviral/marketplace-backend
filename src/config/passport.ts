@@ -7,6 +7,12 @@ const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID!;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET!;
 const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL!;
 
+const optimizeGoogleImage = (url: string): string => {
+  if (!url || !url.includes("googleusercontent.com")) return url;
+  // Replace =s<number>(-c) with =s400 to get higher resolution
+  return url.replace(/=s\d+(-c)?/g, "=s400");
+};
+
 passport.use(
   new GoogleStrategy(
     {
@@ -18,7 +24,7 @@ passport.use(
       try {
         const email = profile.emails?.[0]?.value;
         const name = profile.displayName;
-        const imageUrl = profile._json.picture || "";
+        const imageUrl = optimizeGoogleImage(profile._json.picture || "");
 
         if (!email) {
           return done(new Error("Google profile has no email"));
@@ -37,10 +43,10 @@ passport.use(
             email,
             imageUrl,
             ["user"]
-         );
+          );
         }
 
-        const payload: JwtBody ={
+        const payload: JwtBody = {
           id: user.id,
           email: user.email,
           name: user.name,

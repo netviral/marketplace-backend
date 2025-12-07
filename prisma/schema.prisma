@@ -35,17 +35,19 @@ model User {
 }
 
 model Vendor {
-  id           String   @id @default(uuid())
-  name         String
-  logo         String   @default("")
-  description  String
-  contactEmail String
-  contactPhone String
-  categories   String[]
-  isActive     Boolean  @default(true)
-  isVerified   Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                 String   @id @default(uuid())
+  name               String
+  logo               String   @default("")
+  description        String
+  contactEmail       String
+  contactPhone       String
+  paymentInformation String?
+  upiId              String?
+  categories         String[]
+  isActive           Boolean  @default(true)
+  isVerified         Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   // relations
   listings Listing[]
