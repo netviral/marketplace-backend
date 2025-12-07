@@ -12,6 +12,28 @@ import { ApiResponse } from './models/apiResponse.model.js';
 
 
 const app = express();
+
+// CORS configuration - must be before other middleware
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001'];
+
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cookie');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
+
 app.use(bodyParser.urlencoded({ extended: true })); // parses URL-encoded forms
 app.use(apiResponseMiddleware); // important
 app.use(express.json()); // built-in body parser for JSON
