@@ -1,11 +1,11 @@
 import express, { Request, Response } from "express";
 import passport from "../../../config/passport.js";
 import { JwtService } from "../../../services/jwtService.js";
-import ensureGoogleRedirect  from "../../../middlewares/ensureGoogleRedirect.middleware.js";
+import ensureGoogleRedirect from "../../../middlewares/googleRedirect.middleware.js";
 import { ApiResponse } from "../../../models/apiResponse.model.js";
 import JwtBody from "../../../models/jwt.payload.js";
 import { AuthMiddleware } from "../../../middlewares/auth.middleware.js";
-import ENV from "../../../env.js";
+import ENV from "../../../config/env.config.js";
 
 
 const router = express.Router({ mergeParams: true });
@@ -27,7 +27,7 @@ router.get(
  * /auth/browser/google/callback
  */
 router.get(
-  "/callback", ensureGoogleRedirect, 
+  "/callback", ensureGoogleRedirect,
   passport.authenticate("google", { session: false }),
   async (req: Request, res: Response) => {
     try {

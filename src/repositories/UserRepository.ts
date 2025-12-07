@@ -1,4 +1,4 @@
-import { prisma } from "../prisma.config.js";
+import { prisma } from "../config/database.config.js";
 import User from "../models/User.model.js";
 
 export default class UserRepository {
@@ -19,6 +19,7 @@ export default class UserRepository {
           email: user["_email"],
           imageUrl: user["_imageUrl"],
           roles: user["_roles"],
+          isActive: user["_isActive"],
         },
       });
 
@@ -41,12 +42,12 @@ export default class UserRepository {
     });
     return new User(db.id, db.name, db.email, db.imageUrl ?? "", db.roles);
   }
-  
-  
-  static async verifyApiKey(email: string, apiKey:string): Promise<boolean> {
-    if(email && apiKey) {
+
+
+  static async verifyApiKey(email: string, apiKey: string): Promise<boolean> {
+    if (email && apiKey) {
       const user: User | null = await this.findByEmail(email);
-      if(user !== null) {
+      if (user !== null) {
         return user["apiKey"] === apiKey;
       }
     }

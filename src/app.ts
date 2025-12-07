@@ -1,8 +1,9 @@
-import express, {Request, Response, NextFunction} from 'express';
+/// <reference path="./types/express.d.ts" />
+import express, { Request, Response, NextFunction } from 'express';
 import mainRouter from './routes/index.js';
 import { AuthMiddleware } from "./middlewares/auth.middleware.js";
 import bodyParser from "body-parser";
-import { apiResponseMiddleware } from "./middlewares/apiResponse.middleware.js";
+import { apiResponseMiddleware } from "./middlewares/response.middleware.js";
 import passport from "./config/passport.js";
 import AuthRouter from "./routes/auth/index.js";
 import session from "express-session";
@@ -35,7 +36,7 @@ app.use('/api', AuthMiddleware.isBearerAuthenticated, mainRouter);
 app.use('/', mainRouter);
 
 app.use((req: Request, res: Response) => {
-    res.api(ApiResponse.error(404, "Resource not found"));
+  res.api(ApiResponse.error(404, "Resource not found"));
 });
 
 app.listen(process.env.PORT, () => {

@@ -1,3 +1,4 @@
+/// <reference path="../types/express.d.ts" />
 import { Request, Response, NextFunction } from "express";
 import { JwtService } from "../services/jwtService.js";
 import UserService from "../services/UserService.js";

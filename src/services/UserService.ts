@@ -13,7 +13,7 @@ export default class UserService {
   }
 
   static async registerUser(name: string, email:string, imageUrl: string, roles: string[] = ["user"]): Promise<User> {
-    const user = UserFactory.createNew(name, imageUrl, email, roles);
+    const user = UserFactory.createNew(name, email, imageUrl,roles);
     await UserRepository.create(user);
     return user;
   }

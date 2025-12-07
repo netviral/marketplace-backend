@@ -1,3 +1,4 @@
+/// <reference path="../../types/express.d.ts" />
 import express from 'express';
 import BrowserRouter from "./browser/index.js";
 import ApiRouter from "./api/bearer-token.js";

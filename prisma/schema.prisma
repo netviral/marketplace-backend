@@ -11,20 +11,20 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  imageUrl  String?
-  roles     String[]
-  isActive  Boolean  @default(true)
-  isBlocked Boolean  @default(false)
-  isAdmin   Boolean  @default(false)
-  phone     String?
-  address   String?
-  passwordHash   String?
-  apiKey   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  imageUrl     String?
+  roles        String[]
+  isActive     Boolean  @default(true)
+  isBlocked    Boolean  @default(false)
+  isAdmin      Boolean  @default(false)
+  phone        String?
+  address      String?
+  passwordHash String?
+  apiKey       String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // relations
   reviews       Review[]
@@ -139,6 +139,6 @@ enum InventoryType {
 enum OrderStatus {
   PENDING
   CONFIRMED
-  COMPLETED
+  DELIVERED
   CANCELLED
 }

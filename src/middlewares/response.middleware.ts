@@ -1,3 +1,4 @@
+/// <reference path="../types/express.d.ts" />
 import { ApiResponse } from "../models/apiResponse.model.js";
 import { Request, Response, NextFunction } from "express";
 

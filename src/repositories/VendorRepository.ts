@@ -1,4 +1,4 @@
-import { prisma } from "../prisma.config.js";
+import { prisma } from "../config/database.config.js";
 import Vendor from "../models/Vendor.model.js";
 
 export default class VendorRepository {
@@ -10,14 +10,16 @@ export default class VendorRepository {
   }
 
   static async create(vendor: Vendor): Promise<Vendor> {
-    const db = await prisma.vendor.create({ data: {
-      id: vendor.id,
-      name: vendor.name,
-      description: vendor.description,
-      contactEmail: vendor.contactEmail,
-      contactPhone: vendor.contactPhone,
-      categories: vendor.categories,
-    }});
+    const db = await prisma.vendor.create({
+      data: {
+        id: vendor.id,
+        name: vendor.name,
+        description: vendor.description,
+        contactEmail: vendor.contactEmail,
+        contactPhone: vendor.contactPhone,
+        categories: vendor.categories,
+      }
+    });
     return new Vendor(db.id, db.name, db.description, db.contactEmail, db.contactPhone, db.categories);
   }
 

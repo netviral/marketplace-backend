@@ -1,5 +1,5 @@
 import jwt, { JwtPayload, SignOptions, Secret } from "jsonwebtoken";
-import ENV from "../env.js";
+import ENV from "../config/env.config.js";
 import JwtBody from "../models/jwt.payload.js";
 
 export class JwtService {
