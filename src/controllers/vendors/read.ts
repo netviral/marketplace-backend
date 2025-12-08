@@ -115,7 +115,8 @@ export const getMyVendors = async (req: Request, res: Response): Promise<void> =
             return;
         }
 
-        const vendors = await prisma.vendor.findMany({
+        // Fetch vendors where user is an owner
+        const ownedVendors = await prisma.vendor.findMany({
             where: {
                 owners: {
                     some: { email: user.email }
@@ -132,7 +133,34 @@ export const getMyVendors = async (req: Request, res: Response): Promise<void> =
             orderBy: { createdAt: 'desc' }
         });
 
-        res.api(ApiResponse.success(200, "My vendors fetched successfully", vendors));
+        // Fetch vendors where user is a member (but not an owner)
+        const memberVendors = await prisma.vendor.findMany({
+            where: {
+                members: {
+                    some: { email: user.email }
+                },
+                owners: {
+                    none: { email: user.email }
+                }
+            },
+            include: {
+                _count: {
+                    select: {
+                        listings: true,
+                        members: true
+                    }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        // Combine results with relationship type
+        const allVendors = [
+            ...ownedVendors.map(vendor => ({ ...vendor, isMember: false, isOwner: true })),
+            ...memberVendors.map(vendor => ({ ...vendor, isMember: true, isOwner: false }))
+        ];
+
+        res.api(ApiResponse.success(200, "My vendors fetched successfully", allVendors));
     } catch (error) {
         console.error("Error fetching my vendors:", error);
         res.api(ApiResponse.error(500, "Error fetching my vendors", error));
