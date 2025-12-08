@@ -214,3 +214,134 @@ export const updateVendorOrder = async (req: Request, res: Response): Promise<vo
         res.api(ApiResponse.error(code, msg, error));
     }
 };
+
+/**
+ * Update order status for a listing order
+ * @route PUT /listings/:listingId/orders/:id
+ * @access Private - Vendor owner or member only
+ */
+export const updateListingOrder = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { listingId, id } = req.params;
+        const user = req.user as User | undefined;
+        const { status, notes, transactionId } = req.body;
+
+        if (!user || !user.email) {
+            res.api(ApiResponse.error(401, "Unauthorized: No user information found", "unauthorized"));
+            return;
+        }
+
+        if (!listingId) {
+            res.api(ApiResponse.error(400, "Listing ID is required", "missing_listing_id"));
+            return;
+        }
+
+        if (!id) {
+            res.api(ApiResponse.error(400, "Order ID is required", "missing_order_id"));
+            return;
+        }
+
+        // Validate status
+        const validStatuses = ['PENDING', 'CONFIRMED', 'DELIVERED', 'CANCELLED'];
+        if (status && !validStatuses.includes(status)) {
+            res.api(ApiResponse.error(400, `Status must be one of: ${validStatuses.join(', ')}`, "invalid_status"));
+            return;
+        }
+
+        const order = await prisma.$transaction(async (tx) => {
+            // Get the listing to check vendor ownership
+            const listing = await tx.listing.findUnique({
+                where: { id: listingId },
+                select: { vendorId: true }
+            });
+
+            if (!listing) {
+                throw new Error("Listing not found");
+            }
+
+            // Check if user is owner or member of the vendor
+            const vendor = await tx.vendor.findFirst({
+                where: {
+                    id: listing.vendorId,
+                    OR: [
+                        { owners: { some: { email: user.email } } },
+                        { members: { some: { email: user.email } } }
+                    ]
+                }
+            });
+
+            if (!vendor) {
+                throw new Error("You don't have access to this listing's orders");
+            }
+
+            const existingOrder = await tx.order.findFirst({
+                where: {
+                    id,
+                    listingId
+                }
+            });
+
+            if (!existingOrder) {
+                throw new Error("Order not found for this listing");
+            }
+
+            // Validate status transitions
+            if (status) {
+                // PENDING can go to CONFIRMED or CANCELLED
+                if (existingOrder.status === 'PENDING' && !['CONFIRMED', 'CANCELLED'].includes(status)) {
+                    throw new Error("Pending orders can only be moved to CONFIRMED or CANCELLED");
+                }
+                // CONFIRMED can go to DELIVERED or CANCELLED
+                if (existingOrder.status === 'CONFIRMED' && !['DELIVERED', 'CANCELLED'].includes(status)) {
+                    throw new Error("Confirmed orders can only be moved to DELIVERED or CANCELLED");
+                }
+                // DELIVERED and CANCELLED are final states
+                if (existingOrder.status === 'DELIVERED') throw new Error("Delivered orders cannot be modified");
+                if (existingOrder.status === 'CANCELLED') throw new Error("Cancelled orders cannot be modified");
+            }
+
+            const updateData: Record<string, unknown> = {};
+            if (status !== undefined) updateData.status = status;
+            if (notes !== undefined) updateData.notes = notes;
+            if (transactionId !== undefined) updateData.transactionId = transactionId;
+
+            return await tx.order.update({
+                where: { id },
+                data: updateData as any,
+                include: {
+                    user: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                            phone: true,
+                            address: true
+                        }
+                    },
+                    listing: {
+                        select: {
+                            id: true,
+                            name: true,
+                            price: true,
+                            images: true
+                        }
+                    }
+                }
+            });
+        });
+
+        // Notifications
+        if (status === 'CANCELLED' || status === 'CONFIRMED' || status === 'DELIVERED') {
+            if (status === 'CANCELLED') {
+                NotificationService.sendOrderCancelled(id).catch(console.error);
+            }
+        }
+
+        res.api(ApiResponse.success(200, "Order updated successfully", order));
+    } catch (error: any) {
+        console.error("Error updating listing order:", error);
+        const msg = error.message || "Error updating listing order";
+        const code = msg.includes("access") ? 403 : (msg.includes("not found") ? 404 : 400);
+        res.api(ApiResponse.error(code, msg, error));
+    }
+};
