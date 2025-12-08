@@ -7,6 +7,7 @@ import { Request, Response } from "express";
 import { prisma } from "../../config/database.config.js";
 import { ApiResponse } from "../../models/apiResponse.model.js";
 import User from "../../models/User.model.js";
+import { S3Service } from "../../services/S3Service.js";
 
 /**
  * Create a new listing for a vendor
@@ -26,7 +27,8 @@ export const createListing = async (req: Request, res: Response): Promise<void> 
             isAvailable,
             price,
             variants = [],
-            tags = []
+            tags = [],
+            managed // Extraction for newly added field
         } = req.body;
         const user = req.user as User | undefined;
 
@@ -84,6 +86,18 @@ export const createListing = async (req: Request, res: Response): Promise<void> 
             return;
         }
 
+        // Process Images
+        let imageUrls: string[] = [];
+        if (Array.isArray(images) && images.length > 0) {
+            try {
+                imageUrls = await S3Service.uploadImages(images, 'listings');
+            } catch (error) {
+                console.error("Image upload failed:", error);
+                res.api(ApiResponse.error(500, "Failed to upload listing images", error));
+                return;
+            }
+        }
+
         // Build listing data
         const listingData: Record<string, unknown> = {
             name,
@@ -91,11 +105,12 @@ export const createListing = async (req: Request, res: Response): Promise<void> 
             type,
             inventoryType,
             vendorId,
-            images,
+            images: imageUrls,
             availableQty,
             isAvailable,
             price,
-            variants
+            variants,
+            managed: managed || false // Default false
         };
 
         // Add tags if provided

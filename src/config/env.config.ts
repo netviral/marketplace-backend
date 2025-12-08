@@ -107,7 +107,13 @@ const envSchema = z.object({
         return num;
     }),
     SMTP_USER: z.string().min(1, "SMTP_USER is required"),
-    SMTP_PASS: z.string().min(1, "SMTP_PASS is required")
+    SMTP_PASS: z.string().min(1, "SMTP_PASS is required"),
+
+    // AWS S3 Configuration
+    AWS_ACCESS_KEY_ID: z.string().min(1, "AWS_ACCESS_KEY_ID is required"),
+    AWS_SECRET_ACCESS_KEY: z.string().min(1, "AWS_SECRET_ACCESS_KEY is required"),
+    AWS_REGION: z.string().default("ap-south-1"),
+    AWS_S3_BUCKET: z.string().default("ashoka-marketplace-images"),
 });
 
 // ============================================

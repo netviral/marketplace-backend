@@ -6,6 +6,7 @@
 import { Request, Response } from "express";
 import { prisma } from "../../config/database.config.js";
 import { ApiResponse } from "../../models/apiResponse.model.js";
+import { S3Service } from "../../services/S3Service.js";
 
 /**
  * Update vendor information
@@ -55,7 +56,18 @@ export const updateVendor = async (req: Request, res: Response): Promise<void> =
         if (contactEmail !== undefined) updateData.contactEmail = contactEmail;
         if (contactPhone !== undefined) updateData.contactPhone = contactPhone;
         if (categories !== undefined) updateData.categories = categories;
-        if (logo !== undefined) updateData.logo = logo;
+
+        // Handle Logo Upload
+        if (logo !== undefined) {
+            try {
+                updateData.logo = await S3Service.uploadImage(logo, 'vendors');
+            } catch (error) {
+                console.error("Logo upload failed", error);
+                res.api(ApiResponse.error(500, "Failed to upload logo", error));
+                return;
+            }
+        }
+
         if (paymentInformation !== undefined) updateData.paymentInformation = paymentInformation;
         if (upiId !== undefined) updateData.upiId = upiId;
 

@@ -64,6 +64,7 @@ model Listing {
   inventoryType InventoryType
   availableQty  Int?
   isAvailable   Boolean?
+  managed       Boolean       @default(false)
   price         Decimal?      @db.Decimal(10, 2)
   variants      String[]      @default([])
 
@@ -89,9 +90,9 @@ model Tag {
 }
 
 model Review {
-  id       String   @id @default(uuid())
+  id       String @id @default(uuid())
   rating   Int
-  comments String[] @default([])
+  comments String @default("")
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
@@ -115,11 +116,11 @@ model Order {
   user    User    @relation(fields: [userId], references: [id])
   listing Listing @relation(fields: [listingId], references: [id])
 
-  quantity   Int         @default(1)
-  totalPrice Decimal     @db.Decimal(10, 2)
-  status     OrderStatus @default(PENDING)
-
-  notes String?
+  quantity      Int         @default(1)
+  totalPrice    Decimal     @db.Decimal(10, 2)
+  status        OrderStatus @default(PENDING)
+  transactionId String?
+  notes         String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

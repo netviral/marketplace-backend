@@ -144,6 +144,19 @@ Base URL: `/api/wishlist`
 
 ---
 
+### **6. Reviews (`/reviews`)**
+Base URL: `/api/reviews`
+
+| Method | Endpoint | Access | Description |
+|:---|:---|:---|:---|
+| **GET** | `/reviews` | Public | Get reviews (Filter: `?listingId=...`) |
+| **GET** | `/reviews/me` | User | Get my reviews |
+| **POST** | `/reviews` | User | Post a review (One per listing) |
+| **PUT** | `/reviews/:id` | User | Update my review |
+| **DELETE** | `/reviews/:id` | User | Delete my review |
+
+---
+
 ## 🕹 Controllers
 
 Controllers are **modularized** to prevent large files and separate concerns.

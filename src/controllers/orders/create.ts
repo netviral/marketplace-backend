@@ -7,6 +7,7 @@ import { Request, Response } from "express";
 import { prisma } from "../../config/database.config.js";
 import { ApiResponse } from "../../models/apiResponse.model.js";
 import User from "../../models/User.model.js";
+import { NotificationService } from "../../services/NotificationService.js";
 
 /**
  * Create a new order for the logged-in user
@@ -16,7 +17,7 @@ import User from "../../models/User.model.js";
 export const createOrder = async (req: Request, res: Response): Promise<void> => {
     try {
         const user = req.user as User | undefined;
-        const { listingId, quantity = 1, notes } = req.body;
+        const { listingId, quantity = 1, notes, transactionId } = req.body;
 
         // Check authentication
         if (!user || !user.id) {
@@ -35,68 +36,88 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
             return;
         }
 
-        // Fetch the listing to calculate total price
-        const listing = await prisma.listing.findUnique({
-            where: { id: listingId },
-            select: {
-                id: true,
-                price: true,
-                isAvailable: true,
-                availableQty: true,
-                name: true
+        // Use transaction to ensure safe inventory checking and batch order creation
+        const createdOrders = await prisma.$transaction(async (tx) => {
+            // 1. Fetch listing (for price and basic checks)
+            const listing = await tx.listing.findUnique({
+                where: { id: listingId }
+            });
+
+            if (!listing) {
+                throw new Error("Listing not found");
             }
-        });
 
-        if (!listing) {
-            res.api(ApiResponse.error(404, "Listing not found", "listing_not_found"));
-            return;
-        }
+            if (listing.isAvailable === false) {
+                throw new Error("Listing is not available for order");
+            }
 
-        if (listing.isAvailable === false) {
-            res.api(ApiResponse.error(400, "Listing is not available for order", "listing_unavailable"));
-            return;
-        }
+            if (!listing.price) {
+                throw new Error("Listing does not have a price set");
+            }
 
-        if (listing.availableQty !== null && listing.availableQty < quantity) {
-            res.api(ApiResponse.error(400, `Only ${listing.availableQty} items available`, "insufficient_quantity"));
-            return;
-        }
+            // 2. Manage Inventory (if applicable) - Decrement TOTAL quantity
+            if (listing.managed && listing.inventoryType === 'STOCK') {
+                try {
+                    await tx.listing.update({
+                        where: {
+                            id: listingId,
+                            availableQty: { gte: quantity }
+                        },
+                        data: {
+                            availableQty: { decrement: quantity }
+                        }
+                    });
+                } catch (e: any) {
+                    if (e.code === 'P2025') {
+                        throw new Error(`Insufficient stock. Only ${listing.availableQty ?? 0} items available.`);
+                    }
+                    throw e;
+                }
+            }
 
-        if (!listing.price) {
-            res.api(ApiResponse.error(400, "Listing does not have a price set", "no_price"));
-            return;
-        }
+            const unitPrice = Number(listing.price);
+            const orders = [];
 
-        const totalPrice = Number(listing.price) * quantity;
-
-        // Create the order
-        const order = await prisma.order.create({
-            data: {
-                userId: user.id,
-                listingId,
-                quantity,
-                totalPrice,
-                notes,
-                status: 'PENDING'
-            },
-            include: {
-                listing: {
+            // 3. Create N individual orders (Quantity 1 each)
+            for (let i = 0; i < quantity; i++) {
+                const order = await tx.order.create({
+                    data: {
+                        userId: user.id,
+                        listingId,
+                        quantity: 1, // Individual tracking
+                        totalPrice: unitPrice,
+                        notes,
+                        status: 'PENDING',
+                        transactionId: transactionId || null
+                    },
                     include: {
-                        vendor: {
-                            select: {
-                                id: true,
-                                name: true,
-                                logo: true
+                        listing: {
+                            include: {
+                                vendor: {
+                                    select: {
+                                        id: true,
+                                        name: true,
+                                        logo: true
+                                    }
+                                }
                             }
                         }
                     }
-                }
+                });
+                orders.push(order);
             }
+
+            return orders;
         });
 
-        res.api(ApiResponse.success(201, "Order created successfully", order));
-    } catch (error) {
+        // 4. Send Notifications (Aggregated)
+        const orderIds = createdOrders.map(o => o.id);
+        NotificationService.sendOrdersCreated(orderIds).catch(err => console.error("Notification failed", err));
+
+        res.api(ApiResponse.success(201, "Orders created successfully", createdOrders));
+    } catch (error: any) {
         console.error("Error creating order:", error);
-        res.api(ApiResponse.error(500, "Error creating order", error));
+        const code = error.message.includes("Listing not found") ? 404 : 400;
+        res.api(ApiResponse.error(code, error.message || "Error creating order", error));
     }
 };

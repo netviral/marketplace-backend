@@ -7,6 +7,7 @@ import { Request, Response } from "express";
 import { prisma } from "../../config/database.config.js";
 import { ApiResponse } from "../../models/apiResponse.model.js";
 import User from "../../models/User.model.js";
+import { S3Service } from "../../services/S3Service.js";
 
 /**
  * Create a new vendor
@@ -50,6 +51,21 @@ export const createVendor = async (req: Request, res: Response): Promise<void> =
             return;
         }
 
+        // Process Logo Upload
+        let logoUrl = logo;
+        if (logo) {
+            try {
+                logoUrl = await S3Service.uploadImage(logo, 'vendors');
+            } catch (error) {
+                console.error("Logo upload failed:", error);
+                // Proceed without logo or fail? 
+                // Usually better to fail or warn.
+                // Assuming fail for now to ensure consistency.
+                res.api(ApiResponse.error(500, "Failed to upload logo image", error));
+                return;
+            }
+        }
+
         // Create vendor with current user as owner
         const vendor = await prisma.vendor.create({
             data: {
@@ -58,7 +74,7 @@ export const createVendor = async (req: Request, res: Response): Promise<void> =
                 contactEmail,
                 contactPhone,
                 categories,
-                logo,
+                logo: logoUrl, // Use processed URL
                 paymentInformation,
                 upiId,
                 owners: {

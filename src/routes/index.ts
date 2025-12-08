@@ -10,6 +10,7 @@ import listingsRouter from "./listings/index.js";
 import usersRouter from "./users/index.js";
 import ordersRouter from "./orders/index.js";
 import wishlistRouter from "./wishlist/index.js";
+import reviewsRouter from "./reviews/index.js";
 
 // ============================================
 // ROUTER SETUP
@@ -66,6 +67,14 @@ router.use("/orders", ordersRouter);
  * - /wishlist/:listingId - Add/Remove
  */
 router.use("/wishlist", wishlistRouter);
+
+/**
+ * Reviews routes
+ * Mounted at: /reviews
+ * Handles:
+ * - /reviews - CRUD
+ */
+router.use("/reviews", reviewsRouter);
 
 // ============================================
 // EXPORT

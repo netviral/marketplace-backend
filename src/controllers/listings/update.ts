@@ -6,6 +6,7 @@
 import { Request, Response } from "express";
 import { prisma } from "../../config/database.config.js";
 import { ApiResponse } from "../../models/apiResponse.model.js";
+import { S3Service } from "../../services/S3Service.js";
 
 /**
  * Update listing
@@ -25,7 +26,8 @@ export const updateListing = async (req: Request, res: Response): Promise<void> 
             isAvailable,
             price,
             variants,
-            tags
+            tags,
+            managed
         } = req.body;
 
         if (!id) {
@@ -60,11 +62,26 @@ export const updateListing = async (req: Request, res: Response): Promise<void> 
         if (description !== undefined) updateData.description = description;
         if (type !== undefined) updateData.type = type;
         if (inventoryType !== undefined) updateData.inventoryType = inventoryType;
-        if (images !== undefined) updateData.images = images;
         if (availableQty !== undefined) updateData.availableQty = availableQty;
         if (isAvailable !== undefined) updateData.isAvailable = isAvailable;
         if (price !== undefined) updateData.price = price;
         if (variants !== undefined) updateData.variants = variants;
+        if (managed !== undefined) updateData.managed = managed;
+
+        // Handle Images Upload
+        if (images !== undefined) {
+            if (Array.isArray(images) && images.length > 0) {
+                try {
+                    updateData.images = await S3Service.uploadImages(images, 'listings');
+                } catch (error) {
+                    console.error("Failed to upload listing images", error);
+                    res.api(ApiResponse.error(500, "Failed to upload listing images", error));
+                    return;
+                }
+            } else {
+                updateData.images = [];
+            }
+        }
 
         // Handle tags update
         if (tags !== undefined && Array.isArray(tags)) {
