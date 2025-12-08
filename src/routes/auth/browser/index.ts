@@ -19,13 +19,13 @@ router.get("/me", async (req: Request, res: Response) => {
   try {
     const token = req.cookies?.accessToken;
     // console.log("ME token:", token);
-    
+
     if (!token) {
       return res.api(ApiResponse.error(401, "Not logged in"));
     }
 
     const user = JwtService.verifyAccessToken(token) as JwtPayload;
-    
+
     console.log("ME:", user);
 
     if (!user?.email) {
@@ -38,7 +38,7 @@ router.get("/me", async (req: Request, res: Response) => {
     }
 
     return res.api(
-      ApiResponse.success(200, "User fetched", { isSignedIn:true, user })
+      ApiResponse.success(200, "User fetched", { isSignedIn: true, user })
     );
   } catch (err) {
     console.error("ME error:", err);
@@ -95,9 +95,12 @@ router.get("/logout", AuthMiddleware.isCookieAuthenticated, (req: Request, res: 
   res.clearCookie("accessToken", { path: "/" });
   res.clearCookie("refreshToken", { path: "/" });
 
-  return res.api(
-    ApiResponse.success(202, "Logged out successfully", {})
-  );
+  // res.api(
+  //   ApiResponse.success(202, "Logged out successfully", {})
+  // );
+
+  return res.redirect(`${process.env.FRONTEND_REDIRECT_URL}`);
+
 });
 
 export default router;
