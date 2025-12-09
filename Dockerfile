@@ -1,6 +1,9 @@
 # Use Node.js 20 LTS
 FROM node:20
 
+# Install system deps required for node-gyp builds
+RUN apt-get update && apt-get install -y python3 build-essential
+
 # Set working directory
 WORKDIR /app
 
@@ -22,8 +25,6 @@ RUN npm run build
 
 # Set default port
 ENV PORT=4000
-# Expose Port
 EXPOSE 4000
 
-# Start command
 CMD ["node", "dist/app.js"]
