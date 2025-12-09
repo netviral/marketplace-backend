@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { CookieOptions, Request, Response } from "express";
 import passport from "../../../config/passport.js";
 import { JwtService } from "../../../services/jwtService.js";
 import ensureGoogleRedirect from "../../../middlewares/googleRedirect.middleware.js";
@@ -13,6 +13,17 @@ const router = express.Router({ mergeParams: true });
  * /auth/browser/google
  * Browser-initiated OAuth flow
  */
+
+const isProd = process.env.NODE_ENV === "production";
+
+const cookieConfig = (maxAge: number): CookieOptions => ({
+  httpOnly: true,
+  secure: isProd,
+  sameSite: isProd ? "none" : "lax",
+  path: "/",
+  maxAge,
+});
+
 
 router.get(
   "/",
@@ -42,22 +53,17 @@ router.get(
 
       const refreshToken = JwtService.generateRefreshToken(user);
 
-      const cookieOptions = {
-        httpOnly: true,
-        sameSite: "lax" as const,
-        secure: process.env.NODE_ENV === "production",
-        path: "/",
-      };
+      // const cookieOptions = {
+      //   httpOnly: true,
+      //   sameSite: "lax" as const,
+      //   secure: process.env.NODE_ENV === "production",
+      //   path: "/",
+      // };
 
-      res.cookie("accessToken", accessToken, {
-        ...cookieOptions,
-        maxAge: ENV.JWT_EXPIRES_IN_MS,
-      });
+      res.cookie("accessToken", accessToken, cookieConfig(ENV.JWT_EXPIRES_IN_MS));
 
-      res.cookie("refreshToken", refreshToken, {
-        ...cookieOptions,
-        maxAge: ENV.JWT_REFRESH_EXPIRES_IN_MS,
-      });
+      res.cookie("refreshToken", refreshToken, cookieConfig(ENV.JWT_REFRESH_EXPIRES_IN_MS));
+
 
       return res.redirect(`${process.env.FRONTEND_REDIRECT_URL}`);
     } catch (err) {

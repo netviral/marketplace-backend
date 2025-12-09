@@ -1,5 +1,5 @@
 
-import express, { Request, Response } from "express";
+import express, { CookieOptions, Request, Response } from "express";
 import { JwtService } from "../../../services/jwtService.js";
 import { AuthMiddleware } from "../../../middlewares/auth.middleware.js";
 import UserService from "../../../services/UserService.js";
@@ -7,9 +7,21 @@ import { ApiResponse } from "../../../models/apiResponse.model.js";
 import { JwtPayload } from "jsonwebtoken";
 import { AuthService } from "../../../services/AuthService.js";
 import googleRouter from "./google.js";
+import ENV from "../../../config/env.config.js";
 
 const app = express();
 app.use(express.json());
+
+
+const isProd = process.env.NODE_ENV === "production";
+
+const cookieConfig = (maxAge: number): CookieOptions => ({
+  httpOnly: true,
+  secure: isProd,
+  sameSite: isProd ? "none" : "lax",
+  path: "/",
+  maxAge,
+});
 
 const router = express.Router({ mergeParams: true });
 
@@ -76,13 +88,7 @@ router.post("/refresh", (req: Request, res: Response) => {
   }
 
   // IMPORTANT: write new access token cookie
-  res.cookie("accessToken", newAccessToken, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "lax",       // or strict
-    path: "/",
-    maxAge: 15 * 60 * 1000 // 15 min
-  });
+  res.cookie("accessToken", newAccessToken, cookieConfig(ENV.JWT_EXPIRES_IN_MS));
 
   // you can return empty json or success message
   return res.api(
