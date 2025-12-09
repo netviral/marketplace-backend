@@ -9,6 +9,7 @@
 
 import express from "express";
 import * as ListingsController from "../../controllers/listings/index.js";
+import * as OrdersController from "../../controllers/orders/index.js";
 
 // ============================================
 // ROUTER SETUP
@@ -42,6 +43,22 @@ router.get("/", ListingsController.getAllListings);
  * @description Returns detailed information about a specific listing
  */
 router.get("/:id", ListingsController.getListingById);
+
+/**
+ * Get orders for a specific listing
+ * @route GET /listings/:listingId/orders
+ * @access Private - Vendor owner or member only
+ * @description Returns all orders for a specific listing
+ */
+router.get("/:listingId/orders", OrdersController.getListingOrders);
+
+/**
+ * Update order status for a specific listing
+ * @route PUT /listings/:listingId/orders/:id
+ * @access Private - Vendor owner or member only
+ * @description Updates order status for a specific listing order
+ */
+router.put("/:listingId/orders/:id", OrdersController.updateListingOrder);
 
 // ============================================
 // CREATE OPERATIONS

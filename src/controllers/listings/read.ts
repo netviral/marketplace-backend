@@ -89,6 +89,8 @@ export const getListingById = async (req: Request, res: Response): Promise<void>
                         name: true,
                         logo: true,
                         description: true,
+                        upiId: true,
+                        paymentInformation: true,
                         contactEmail: true,
                         contactPhone: true
                     }

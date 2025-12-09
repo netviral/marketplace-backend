@@ -38,7 +38,7 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.urlencoded({ extended: true })); // parses URL-encoded forms
 app.use(apiResponseMiddleware); // important
-app.use(express.json()); // built-in body parser for JSON
+app.use(express.json({ limit: '10mb' })); // built-in body parser for JSON with increased limit for images
 // Required for passport (even if using JWT)
 app.use(
   session({

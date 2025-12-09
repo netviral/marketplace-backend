@@ -374,3 +374,82 @@ export const getVendorOrderStats = async (req: Request, res: Response): Promise<
         res.api(ApiResponse.error(500, "Error fetching vendor order statistics", error));
     }
 };
+
+/**
+ * Get all orders for a specific listing
+ * @route GET /listings/:listingId/orders
+ * @access Private - Vendor owner or member only
+ */
+export const getListingOrders = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { listingId } = req.params;
+        const user = req.user as User | undefined;
+
+        if (!user || !user.email) {
+            res.api(ApiResponse.error(401, "Unauthorized: No user information found", "unauthorized"));
+            return;
+        }
+
+        if (!listingId) {
+            res.api(ApiResponse.error(400, "Listing ID is required", "missing_listing_id"));
+            return;
+        }
+
+        // Get the listing to check vendor ownership
+        const listing = await prisma.listing.findUnique({
+            where: { id: listingId },
+            select: { vendorId: true }
+        });
+
+        if (!listing) {
+            res.api(ApiResponse.error(404, "Listing not found", "listing_not_found"));
+            return;
+        }
+
+        // Check if user is owner or member of the vendor
+        const vendor = await prisma.vendor.findFirst({
+            where: {
+                id: listing.vendorId,
+                OR: [
+                    { owners: { some: { email: user.email } } },
+                    { members: { some: { email: user.email } } }
+                ]
+            }
+        });
+
+        if (!vendor) {
+            res.api(ApiResponse.error(403, "You don't have access to this listing's orders", "no_access"));
+            return;
+        }
+
+        // Fetch orders for this listing
+        const orders = await prisma.order.findMany({
+            where: { listingId },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        phone: true,
+                        address: true
+                    }
+                },
+                listing: {
+                    select: {
+                        id: true,
+                        name: true,
+                        price: true,
+                        images: true
+                    }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        res.api(ApiResponse.success(200, "Listing orders fetched successfully", orders));
+    } catch (error) {
+        console.error("Error fetching listing orders:", error);
+        res.api(ApiResponse.error(500, "Error fetching listing orders", error));
+    }
+};
