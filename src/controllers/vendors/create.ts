@@ -16,7 +16,7 @@ import { S3Service } from "../../services/S3Service.js";
  */
 export const createVendor = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { name, description, contactEmail, contactPhone, categories, logo, paymentInformation, upiId } = req.body;
+        const { name, description, contactEmail, contactPhone, categories, logo, paymentInformation, upiId, memberEmails } = req.body;
         const user = req.user as User | undefined;
 
         // Check authentication
@@ -51,6 +51,12 @@ export const createVendor = async (req: Request, res: Response): Promise<void> =
             return;
         }
 
+        // Validate memberEmails if provided
+        if (memberEmails !== undefined && !Array.isArray(memberEmails)) {
+            res.api(ApiResponse.error(400, "Validation error: 'memberEmails' must be an array", "invalid_member_emails"));
+            return;
+        }
+
         // Process Logo Upload
         let logoUrl = logo;
         if (logo) {
@@ -58,15 +64,37 @@ export const createVendor = async (req: Request, res: Response): Promise<void> =
                 logoUrl = await S3Service.uploadImage(logo, 'vendors');
             } catch (error) {
                 console.error("Logo upload failed:", error);
-                // Proceed without logo or fail? 
-                // Usually better to fail or warn.
-                // Assuming fail for now to ensure consistency.
                 res.api(ApiResponse.error(500, "Failed to upload logo image", error));
                 return;
             }
         }
 
-        // Create vendor with current user as owner
+        // Prepare member connections
+        const memberConnections = [];
+        if (memberEmails && Array.isArray(memberEmails) && memberEmails.length > 0) {
+            // Filter out empty strings and duplicates
+            const validEmails = [...new Set(memberEmails.filter((email: string) => email && email.trim()))];
+
+            // Verify all member emails exist in the database
+            const existingUsers = await prisma.user.findMany({
+                where: {
+                    email: { in: validEmails }
+                },
+                select: { email: true }
+            });
+
+            const existingEmails = existingUsers.map(u => u.email);
+            const missingEmails = validEmails.filter((email: string) => !existingEmails.includes(email));
+
+            if (missingEmails.length > 0) {
+                res.api(ApiResponse.error(400, `The following member emails do not exist: ${missingEmails.join(', ')}`, "invalid_member_emails"));
+                return;
+            }
+
+            memberConnections.push(...validEmails.map((email: string) => ({ email })));
+        }
+
+        // Create vendor with current user as owner and specified members
         const vendor = await prisma.vendor.create({
             data: {
                 name,
@@ -74,15 +102,27 @@ export const createVendor = async (req: Request, res: Response): Promise<void> =
                 contactEmail,
                 contactPhone,
                 categories,
-                logo: logoUrl, // Use processed URL
+                logo: logoUrl,
                 paymentInformation,
                 upiId,
                 owners: {
                     connect: { email: user.email }
-                }
+                },
+                ...(memberConnections.length > 0 && {
+                    members: {
+                        connect: memberConnections
+                    }
+                })
             },
             include: {
                 owners: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true
+                    }
+                },
+                members: {
                     select: {
                         id: true,
                         name: true,
