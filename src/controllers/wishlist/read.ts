@@ -7,7 +7,6 @@ import { Request, Response } from "express";
 import { prisma } from "../../config/database.config.js";
 import { ApiResponse } from "../../models/apiResponse.model.js";
 import User from "../../models/User.model.js";
-import { QueryService } from "../../services/QueryService.js";
 
 /**
  * Get current user's wishlist
@@ -23,25 +22,35 @@ export const getMyWishlist = async (req: Request, res: Response): Promise<void> 
             return;
         }
 
-        // Use QueryService to fetch listings with pagination/search/sort
-        // Filter: Listings where 'wishlistedBy' includes the current user
-        req.query.additionalWhere = {
-            wishlistedBy: {
-                some: {
-                    id: user.id
+        // Direct query to get user's wishlist
+        const wishlistItems = await prisma.listing.findMany({
+            where: {
+                wishlistedBy: {
+                    some: {
+                        id: user.id
+                    }
                 }
-            }
-        };
-
-        const result = await QueryService.query(prisma.listing, req.query, {
-            searchFields: ['name', 'description'],
-            allowedFilters: ['type', 'isAvailable'], // Allow filtering within wishlist
-            defaultSort: 'createdAt:desc',
+            },
             include: {
-                vendor: true, // Likely want to see vendor info
-                tags: true
+                vendor: true,
+                tags: true,
+                reviews: true
+            },
+            orderBy: {
+                createdAt: 'desc'
             }
         });
+
+        // Return in QueryService format for consistency
+        const result = {
+            data: wishlistItems,
+            meta: {
+                total: wishlistItems.length,
+                page: 1,
+                limit: wishlistItems.length,
+                totalPages: 1
+            }
+        };
 
         res.api(ApiResponse.success(200, "Wishlist fetched successfully", result));
     } catch (error) {

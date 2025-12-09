@@ -30,11 +30,16 @@ export const addToWishlist = async (req: Request, res: Response): Promise<void> 
 
         // Check availability? (Optional: you can wishlist OOS items)
 
-        await prisma.user.update({
+        const result = await prisma.user.update({
             where: { id: user.id },
             data: {
                 wishlist: {
                     connect: { id: listingId }
+                }
+            },
+            include: {
+                wishlist: {
+                    select: { id: true }
                 }
             }
         });
@@ -70,11 +75,16 @@ export const removeFromWishlist = async (req: Request, res: Response): Promise<v
             return;
         }
 
-        await prisma.user.update({
+        const result = await prisma.user.update({
             where: { id: user.id },
             data: {
                 wishlist: {
                     disconnect: { id: listingId }
+                }
+            },
+            include: {
+                wishlist: {
+                    select: { id: true }
                 }
             }
         });
@@ -87,6 +97,7 @@ export const removeFromWishlist = async (req: Request, res: Response): Promise<v
             // Prisma disconnect throws if record connect doesn't exist? No, disconnect allows idempotent?
             // Actually P2025 usually happens if the PARENT (User) doesn't exist (unlikely) or child not found.
             // If child not found, it throws.
+            console.error(`P2025 error removing from wishlist:`, error);
             res.api(ApiResponse.error(404, "Listing not found or not in wishlist", "not_found"));
             return;
         }
