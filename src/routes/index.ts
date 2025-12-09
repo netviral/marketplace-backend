@@ -11,6 +11,7 @@ import usersRouter from "./users/index.js";
 import ordersRouter from "./orders/index.js";
 import wishlistRouter from "./wishlist/index.js";
 import reviewsRouter from "./reviews/index.js";
+import adminRouter from "./admin/index.js";
 
 // ============================================
 // ROUTER SETUP
@@ -75,6 +76,15 @@ router.use("/wishlist", wishlistRouter);
  * - /reviews - CRUD
  */
 router.use("/reviews", reviewsRouter);
+
+/**
+ * Admin routes
+ * Mounted at: /admin
+ * Handles:
+ * - /admin/vendors/pending - Get pending vendors
+ * - /admin/vendors/:id/status - Update vendor status
+ */
+router.use("/admin", adminRouter);
 
 // ============================================
 // EXPORT
