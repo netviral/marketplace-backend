@@ -37,12 +37,21 @@ export class NotificationService {
             const totalQuantity = orders.reduce((sum, o) => sum + o.quantity, 0);
 
             // Email to Customer
-            await sendEmail({
-                to: user.email,
-                subject: `Order Confirmation - ${listing.name}`,
-                text: `Your order for ${listing.name} (Total Qty: ${totalQuantity}) has been placed.\nOrder IDs: ${orders.map(o => o.id).join(', ')}\nStatus: ${firstOrder.status}.`,
-                alias: "Marketplace Orders"
-            });
+                        await sendEmail({
+                                to: user.email,
+                                subject: `Order Confirmation - ${listing.name}`,
+                                html: `
+                                    <div style="font-family:Arial,sans-serif;font-size:15px;color:#222;">
+                                        <h2 style="color:#063460;">Order Confirmation</h2>
+                                        <p>Your order for <strong>${listing.name}</strong> (Total Qty: <strong>${totalQuantity}</strong>) has been placed.</p>
+                                        <p><strong>Order IDs:</strong> ${orders.map(o => o.id).join(', ')}</p>
+                                        <p><strong>Status:</strong> ${firstOrder.status}</p>
+                                        <hr>
+                                        <p>Thank you for shopping with Marketplace!</p>
+                                    </div>
+                                `,
+                                alias: "Marketplace Orders"
+                        });
 
             // Email to Vendor (Owners + Members)
             const recipients = [
@@ -53,12 +62,22 @@ export class NotificationService {
             const uniqueRecipients = [...new Set(recipients)];
 
             if (uniqueRecipients.length > 0) {
-                await sendEmail({
-                    to: uniqueRecipients,
-                    subject: `New Orders Received - ${listing.name}`,
-                    text: `New orders have been placed for ${listing.name}.\nTotal Quantity: ${totalQuantity}\nCustomer: ${user.name} (${user.email})\nOrder IDs: ${orders.map(o => o.id).join(', ')}`,
-                    alias: "Marketplace System"
-                });
+                                await sendEmail({
+                                        to: uniqueRecipients,
+                                        subject: `New Orders Received - ${listing.name}`,
+                                        html: `
+                                            <div style="font-family:Arial,sans-serif;font-size:15px;color:#222;">
+                                                <h2 style="color:#063460;">New Orders Received</h2>
+                                                <p>New orders have been placed for <strong>${listing.name}</strong>.</p>
+                                                <p><strong>Total Quantity:</strong> ${totalQuantity}</p>
+                                                <p><strong>Customer:</strong> ${user.name} (${user.email})</p>
+                                                <p><strong>Order IDs:</strong> ${orders.map(o => o.id).join(', ')}</p>
+                                                <hr>
+                                                <p>Please process these orders promptly.</p>
+                                            </div>
+                                        `,
+                                        alias: "Marketplace System"
+                                });
             }
 
         } catch (error) {
@@ -91,12 +110,19 @@ export class NotificationService {
             const { vendor } = listing;
 
             // Email to Customer
-            await sendEmail({
-                to: user.email,
-                subject: `Order Cancelled - ${listing.name}`,
-                text: `Your order for ${listing.name} (ID: ${order.id}) has been cancelled.`,
-                alias: "Marketplace Orders"
-            });
+                        await sendEmail({
+                                to: user.email,
+                                subject: `Order Cancelled - ${listing.name}`,
+                                html: `
+                                    <div style="font-family:Arial,sans-serif;font-size:15px;color:#222;">
+                                        <h2 style="color:#C4122F;">Order Cancelled</h2>
+                                        <p>Your order for <strong>${listing.name}</strong> (ID: <strong>${order.id}</strong>) has been cancelled.</p>
+                                        <hr>
+                                        <p>If you have questions, reply to this email.</p>
+                                    </div>
+                                `,
+                                alias: "Marketplace Orders"
+                        });
 
             // Email to Vendor
             const recipients = [
@@ -106,12 +132,20 @@ export class NotificationService {
             const uniqueRecipients = [...new Set(recipients)];
 
             if (uniqueRecipients.length > 0) {
-                await sendEmail({
-                    to: uniqueRecipients,
-                    subject: `Order Cancelled - ${listing.name}`,
-                    text: `Order for ${listing.name} (Qty: ${order.quantity}) was cancelled by ${user.name}.\nOrder ID: ${order.id}`,
-                    alias: "Marketplace System"
-                });
+                                await sendEmail({
+                                        to: uniqueRecipients,
+                                        subject: `Order Cancelled - ${listing.name}`,
+                                        html: `
+                                            <div style="font-family:Arial,sans-serif;font-size:15px;color:#222;">
+                                                <h2 style="color:#C4122F;">Order Cancelled</h2>
+                                                <p>Order for <strong>${listing.name}</strong> (Qty: <strong>${order.quantity}</strong>) was cancelled by ${user.name}.</p>
+                                                <p><strong>Order ID:</strong> ${order.id}</p>
+                                                <hr>
+                                                <p>Check your dashboard for details.</p>
+                                            </div>
+                                        `,
+                                        alias: "Marketplace System"
+                                });
             }
 
         } catch (error) {
@@ -150,12 +184,21 @@ export class NotificationService {
             const uniqueRecipients = [...new Set(recipients)];
 
             if (uniqueRecipients.length > 0) {
-                await sendEmail({
-                    to: uniqueRecipients,
-                    subject: `New Review for ${listing.name}`,
-                    text: `A new review was posted by ${user.name}.\nRating: ${review.rating}/5\nComment: ${review.comments}`,
-                    alias: "Marketplace Reviews"
-                });
+                                await sendEmail({
+                                        to: uniqueRecipients,
+                                        subject: `New Review for ${listing.name}`,
+                                        html: `
+                                            <div style="font-family:Arial,sans-serif;font-size:15px;color:#222;">
+                                                <h2 style="color:#063460;">New Review Received</h2>
+                                                <p>A new review was posted by <strong>${user.name}</strong>.</p>
+                                                <p><strong>Rating:</strong> ${review.rating}/5</p>
+                                                <p><strong>Comment:</strong> ${review.comments}</p>
+                                                <hr>
+                                                <p>View more details in your dashboard.</p>
+                                            </div>
+                                        `,
+                                        alias: "Marketplace Reviews"
+                                });
             }
         } catch (error) {
             console.error("Error sending review notification:", error);
