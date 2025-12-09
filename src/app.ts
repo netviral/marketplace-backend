@@ -16,7 +16,9 @@ const app = express();
 // CORS configuration - must be before other middleware
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001'];
+
+  // const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001'];
+  const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS?.split(",") || [];
 
   if (origin && allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
