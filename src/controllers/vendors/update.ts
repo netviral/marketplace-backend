@@ -16,7 +16,7 @@ import { S3Service } from "../../services/S3Service.js";
 export const updateVendor = async (req: Request, res: Response): Promise<void> => {
     try {
         const { id } = req.params;
-        const { name, description, contactEmail, contactPhone, categories, logo, paymentInformation, upiId } = req.body;
+        const { name, description, contactEmail, contactPhone, categories, logo, paymentInformation, upiId, memberEmails } = req.body;
 
         if (!id) {
             res.api(ApiResponse.error(400, "Vendor ID is required", "missing_vendor_id"));
@@ -49,6 +49,12 @@ export const updateVendor = async (req: Request, res: Response): Promise<void> =
             return;
         }
 
+        // Validate memberEmails if provided
+        if (memberEmails !== undefined && !Array.isArray(memberEmails)) {
+            res.api(ApiResponse.error(400, "Validation error: 'memberEmails' must be an array", "invalid_member_emails"));
+            return;
+        }
+
         // Build update data
         const updateData: Record<string, unknown> = {};
         if (name !== undefined) updateData.name = name;
@@ -71,11 +77,52 @@ export const updateVendor = async (req: Request, res: Response): Promise<void> =
         if (paymentInformation !== undefined) updateData.paymentInformation = paymentInformation;
         if (upiId !== undefined) updateData.upiId = upiId;
 
+        // Handle member updates
+        if (memberEmails !== undefined && Array.isArray(memberEmails)) {
+            // Filter out empty strings and duplicates
+            const validEmails = [...new Set(memberEmails.filter((email: string) => email && email.trim()))];
+
+            if (validEmails.length > 0) {
+                // Verify all member emails exist in the database
+                const existingUsers = await prisma.user.findMany({
+                    where: {
+                        email: { in: validEmails }
+                    },
+                    select: { email: true }
+                });
+
+                const existingEmails = existingUsers.map(u => u.email);
+                const missingEmails = validEmails.filter((email: string) => !existingEmails.includes(email));
+
+                if (missingEmails.length > 0) {
+                    res.api(ApiResponse.error(400, `The following member emails do not exist: ${missingEmails.join(', ')}`, "invalid_member_emails"));
+                    return;
+                }
+
+                // Replace all members with new list
+                updateData.members = {
+                    set: validEmails.map((email: string) => ({ email }))
+                };
+            } else {
+                // Empty array means remove all members
+                updateData.members = {
+                    set: []
+                };
+            }
+        }
+
         const vendor = await prisma.vendor.update({
             where: { id },
             data: updateData as any,
             include: {
                 owners: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true
+                    }
+                },
+                members: {
                     select: {
                         id: true,
                         name: true,
